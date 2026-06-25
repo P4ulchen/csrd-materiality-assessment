@@ -998,9 +998,11 @@ function createTopicPageContent(topic, meta, pageNumber) {
     94
   );
 
-  parts.push("0.85 0.88 0.86 RG 42 100 m 553 100 l S\n");
-  parts.push(textLine(t("footerNote"), 42, 78, 7.5, "0.38 0.44 0.41"));
-  parts.push(textLine(`${t("page")} ${pageNumber}`, 518, 42, 8, "0.38 0.44 0.41"));
+  parts.push("0.85 0.88 0.86 RG 42 104 m 553 104 l S\n");
+  wrapText(t("footerNote"), 116).slice(0, 2).forEach((line, index) => {
+    parts.push(textLine(line, 42, 84 - index * 10, 7.2, "0.38 0.44 0.41"));
+  });
+  parts.push(textLine(`${t("page")} ${pageNumber}`, 518, 40, 8, "0.38 0.44 0.41"));
   return parts.join("");
 }
 
