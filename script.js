@@ -1005,18 +1005,16 @@ function createTopicPageContent(topic, meta, pageNumber) {
 }
 
 function createMatrixPageContent(meta, imageId) {
-  const pageWidth = 841.89;
-  const pageHeight = 595.28;
-  const imageWidth = 730;
+  const imageWidth = 690;
   const imageHeight = imageWidth * (refs.canvas.height / refs.canvas.width);
-  const imageX = 56;
-  const imageY = 72;
+  const imageX = 76;
+  const imageY = 46;
   return [
     "0.96 0.98 0.97 rg 0 0 841.89 595.28 re f\n",
+    `q ${imageWidth} 0 0 ${imageHeight} ${imageX} ${imageY} cm /Im1 Do Q\n`,
     textLine(t("pdfMatrixTitle"), 56, 555, 22, "0.08 0.13 0.11"),
     textLine(format("sectorLine", { company: meta.companyName, sector: meta.sector, year: meta.reportingYear }), 56, 532, 10, "0.38 0.44 0.41"),
     textLine(format("thresholdsLine", { impact: meta.impactThreshold.toFixed(1), financial: meta.financialThreshold.toFixed(1), date: new Date(meta.exportedAt).toLocaleDateString(lang()) }), 56, 515, 9, "0.38 0.44 0.41"),
-    `q ${imageWidth} 0 0 ${imageHeight} ${imageX} ${imageY} cm /Im1 Do Q\n`,
     textLine(t("pdfDisclaimer"), 56, 42, 8, "0.38 0.44 0.41")
   ].join("");
 }
