@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CSRD Double Materiality Assessment</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow" data-i18n="eyebrow">CSRD and ESRS workspace</p>
+        <h1 data-i18n="title">Double Materiality Assessment</h1>
+      </div>
+      <label class="language-control">
+        <span data-i18n="language">Language</span>
+        <select id="homeLanguageSelect" aria-label="Language">
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+          <option value="fr">Francais</option>
+          <option value="es">Espanol</option>
+        </select>
+      </label>
+    </header>
+
+    <main class="home-shell">
+      <section class="home-hero">
+        <p class="eyebrow" data-i18n="heroEyebrow">For CSRD preparation</p>
+        <h2 data-i18n="heroTitle">Run a structured double materiality assessment</h2>
+        <p data-i18n="heroText">This project helps companies document CSRD and ESRS double materiality work in a practical browser-based tool. It supports impact and financial materiality scoring, stakeholder and evidence tracking, threshold decisions, and export of the matrix and report-ready topic pages.</p>
+        <a id="toolLink" class="primary-link" href="tool.html?lang=en" data-i18n="openTool">Open assessment tool</a>
+      </section>
+
+      <section class="home-grid" aria-label="Project overview">
+        <article class="method-block">
+          <h2 data-i18n="whatTitle">What it does</h2>
+          <p data-i18n="whatText">The tool starts from the ESRS topic universe and lets users add, adapt and score sustainability matters for their own company, value chain and stakeholder context.</p>
+        </article>
+        <article class="method-block">
+          <h2 data-i18n="exportsTitle">Exports</h2>
+          <p data-i18n="exportsText">Users can export a PDF report, SVG matrix or PNG matrix. The PDF places the matrix first, followed by detailed topic pages suitable for inserting into a sustainability report.</p>
+        </article>
+        <article class="method-block">
+          <h2 data-i18n="noteTitle">Important note</h2>
+          <p data-i18n="noteText">The website is a documentation aid for CSRD/ESRS work. It does not replace legal review, management judgement, assurance procedures or the complete ESRS sustainability statement.</p>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      const homeTranslations = {
+        en: {
+          eyebrow: "CSRD and ESRS workspace",
+          title: "Double Materiality Assessment",
+          language: "Language",
+          heroEyebrow: "For CSRD preparation",
+          heroTitle: "Run a structured double materiality assessment",
+          heroText: "This project helps companies document CSRD and ESRS double materiality work in a practical browser-based tool. It supports impact and financial materiality scoring, stakeholder and evidence tracking, threshold decisions, and export of the matrix and report-ready topic pages.",
+          openTool: "Open assessment tool",
+          whatTitle: "What it does",
+          whatText: "The tool starts from the ESRS topic universe and lets users add, adapt and score sustainability matters for their own company, value chain and stakeholder context.",
+          exportsTitle: "Exports",
+          exportsText: "Users can export a PDF report, SVG matrix or PNG matrix. The PDF places the matrix first, followed by detailed topic pages suitable for inserting into a sustainability report.",
+          noteTitle: "Important note",
+          noteText: "The website is a documentation aid for CSRD/ESRS work. It does not replace legal review, management judgement, assurance procedures or the complete ESRS sustainability statement."
+        },
+        de: {
+          eyebrow: "CSRD- und ESRS-Arbeitsbereich",
+          title: "Doppelte Wesentlichkeitsanalyse",
+          language: "Sprache",
+          heroEyebrow: "Zur CSRD-Vorbereitung",
+          heroTitle: "Eine strukturierte doppelte Wesentlichkeitsanalyse durchfuehren",
+          heroText: "Dieses Projekt hilft Unternehmen, ihre CSRD- und ESRS-Arbeit zur doppelten Wesentlichkeit in einem praktischen browserbasierten Tool zu dokumentieren. Es unterstuetzt die Bewertung von Impact- und finanzieller Wesentlichkeit, Stakeholder- und Nachweismanagement, Schwellenwertentscheidungen sowie den Export der Matrix und berichtsreifer Themenseiten.",
+          openTool: "Assessment-Tool oeffnen",
+          whatTitle: "Was das Tool leistet",
+          whatText: "Das Tool startet mit dem ESRS-Themenuniversum und ermoeglicht es, Nachhaltigkeitsthemen fuer das eigene Unternehmen, die Wertschoepfungskette und den Stakeholder-Kontext zu ergaenzen, anzupassen und zu bewerten.",
+          exportsTitle: "Exporte",
+          exportsText: "Nutzer koennen einen PDF-Bericht, eine SVG-Matrix oder eine PNG-Matrix exportieren. Das PDF enthaelt zuerst die Matrix und danach detaillierte Themenseiten, die sich fuer die Nachhaltigkeitsberichterstattung eignen.",
+          noteTitle: "Wichtiger Hinweis",
+          noteText: "Die Website ist eine Dokumentationshilfe fuer CSRD/ESRS-Arbeiten. Sie ersetzt keine rechtliche Pruefung, Managementbeurteilung, Assurance-Verfahren oder die vollstaendige ESRS-Nachhaltigkeitserklaerung."
+        },
+        fr: {
+          eyebrow: "Espace CSRD et ESRS",
+          title: "Evaluation de Double Materialite",
+          language: "Langue",
+          heroEyebrow: "Pour la preparation CSRD",
+          heroTitle: "Realiser une evaluation structuree de double materialite",
+          heroText: "Ce projet aide les entreprises a documenter leur travail CSRD et ESRS de double materialite dans un outil pratique accessible dans le navigateur. Il prend en charge la notation de la materialite d'impact et financiere, le suivi des parties prenantes et des preuves, les decisions de seuils et l'export de la matrice et des pages de sujets pretes pour le rapport.",
+          openTool: "Ouvrir l'outil d'evaluation",
+          whatTitle: "Ce que fait l'outil",
+          whatText: "L'outil part de l'univers des sujets ESRS et permet d'ajouter, adapter et noter les questions de durabilite selon l'entreprise, la chaine de valeur et le contexte des parties prenantes.",
+          exportsTitle: "Exports",
+          exportsText: "Les utilisateurs peuvent exporter un rapport PDF, une matrice SVG ou une matrice PNG. Le PDF place la matrice en premiere page, puis des pages de sujets detaillees pouvant etre inserees dans un rapport de durabilite.",
+          noteTitle: "Note importante",
+          noteText: "Le site est une aide documentaire pour les travaux CSRD/ESRS. Il ne remplace pas la revue juridique, le jugement de la direction, les procedures d'assurance ou l'etat de durabilite ESRS complet."
+        },
+        es: {
+          eyebrow: "Espacio CSRD y ESRS",
+          title: "Evaluacion de Doble Materialidad",
+          language: "Idioma",
+          heroEyebrow: "Para preparar CSRD",
+          heroTitle: "Realizar una evaluacion estructurada de doble materialidad",
+          heroText: "Este proyecto ayuda a las empresas a documentar el trabajo de doble materialidad CSRD y ESRS en una herramienta practica basada en navegador. Permite puntuar materialidad de impacto y financiera, registrar grupos de interes y evidencias, decidir umbrales y exportar la matriz y paginas de temas listas para el informe.",
+          openTool: "Abrir herramienta de evaluacion",
+          whatTitle: "Que hace",
+          whatText: "La herramienta parte del universo de temas ESRS y permite anadir, adaptar y puntuar asuntos de sostenibilidad para la empresa, su cadena de valor y su contexto de grupos de interes.",
+          exportsTitle: "Exportaciones",
+          exportsText: "Los usuarios pueden exportar un informe PDF, una matriz SVG o una matriz PNG. El PDF incluye primero la matriz y despues paginas detalladas por tema adecuadas para insertar en un informe de sostenibilidad.",
+          noteTitle: "Nota importante",
+          noteText: "El sitio web es una ayuda documental para trabajos CSRD/ESRS. No sustituye la revision legal, el juicio de la direccion, los procedimientos de aseguramiento ni la declaracion de sostenibilidad ESRS completa."
+        }
+      };
+
+      const languageSelect = document.querySelector("#homeLanguageSelect");
+      const toolLink = document.querySelector("#toolLink");
+
+      function setHomeLanguage(language) {
+        const activeLanguage = homeTranslations[language] ? language : "en";
+        const dictionary = homeTranslations[activeLanguage];
+        document.documentElement.lang = activeLanguage;
+        document.title = dictionary.title;
+        document.querySelectorAll("[data-i18n]").forEach(element => {
+          element.textContent = dictionary[element.dataset.i18n];
+        });
+        languageSelect.value = activeLanguage;
+        toolLink.href = `tool.html?lang=${activeLanguage}`;
+      }
+
+      languageSelect.addEventListener("change", event => setHomeLanguage(event.target.value));
+      const initialLanguage = new URLSearchParams(location.search).get("lang") || "en";
+      setHomeLanguage(initialLanguage);
+    </script>
+  </body>
+</html>
