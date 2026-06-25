@@ -305,6 +305,214 @@ function download(filename, blob) {
   URL.revokeObjectURL(url);
 }
 
+function pdfEscape(value) {
+  return String(value ?? "")
+    .replaceAll("\\", "\\\\")
+    .replaceAll("(", "\\(")
+    .replaceAll(")", "\\)")
+    .replaceAll("\r", " ")
+    .replaceAll("\n", " ");
+}
+
+function wrapText(text, maxChars) {
+  const words = String(text || "Not documented").split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = "";
+  words.forEach(word => {
+    const next = line ? `${line} ${word}` : word;
+    if (next.length > maxChars && line) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  });
+  if (line) lines.push(line);
+  return lines.length ? lines : ["Not documented"];
+}
+
+function base64ToBytes(base64) {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+class PdfDocument {
+  constructor() {
+    this.encoder = new TextEncoder();
+    this.objects = [null];
+  }
+
+  reserve() {
+    this.objects.push(null);
+    return this.objects.length - 1;
+  }
+
+  setAscii(id, body) {
+    this.objects[id] = { type: "ascii", body };
+  }
+
+  setStream(id, dict, bytes) {
+    this.objects[id] = { type: "stream", dict, bytes };
+  }
+
+  ascii(text) {
+    return this.encoder.encode(text);
+  }
+
+  build(rootId) {
+    const chunks = [this.ascii("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n")];
+    const offsets = [0];
+    let length = chunks[0].length;
+
+    const push = chunk => {
+      chunks.push(chunk);
+      length += chunk.length;
+    };
+
+    for (let id = 1; id < this.objects.length; id += 1) {
+      const object = this.objects[id];
+      offsets[id] = length;
+      push(this.ascii(`${id} 0 obj\n`));
+      if (object.type === "ascii") {
+        push(this.ascii(`${object.body}\n`));
+      } else {
+        push(this.ascii(`<< ${object.dict} /Length ${object.bytes.length} >>\nstream\n`));
+        push(object.bytes);
+        push(this.ascii("\nendstream\n"));
+      }
+      push(this.ascii("endobj\n"));
+    }
+
+    const xrefOffset = length;
+    push(this.ascii(`xref\n0 ${this.objects.length}\n0000000000 65535 f \n`));
+    for (let id = 1; id < this.objects.length; id += 1) {
+      push(this.ascii(`${String(offsets[id]).padStart(10, "0")} 00000 n \n`));
+    }
+    push(this.ascii(`trailer\n<< /Size ${this.objects.length} /Root ${rootId} 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`));
+    return new Blob(chunks, { type: "application/pdf" });
+  }
+}
+
+function textLine(text, x, y, size = 10, color = "0 0 0") {
+  return `BT ${color} rg /F1 ${size} Tf 1 0 0 1 ${x} ${y} Tm (${pdfEscape(text)}) Tj ET\n`;
+}
+
+function addWrappedText(parts, label, text, x, y, maxChars, size = 9, leading = 12) {
+  parts.push(textLine(label, x, y, 8, "0.11 0.37 0.26"));
+  let currentY = y - 13;
+  wrapText(text, maxChars).forEach(line => {
+    parts.push(textLine(line, x, currentY, size, "0.10 0.13 0.12"));
+    currentY -= leading;
+  });
+  return currentY - 5;
+}
+
+function addKeyValue(parts, key, value, x, y, width = 230) {
+  parts.push(textLine(key, x, y, 7.5, "0.38 0.44 0.41"));
+  wrapText(value, Math.max(18, Math.floor(width / 5))).forEach((line, index) => {
+    parts.push(textLine(line, x, y - 12 - index * 10, 9, "0.10 0.13 0.12"));
+  });
+}
+
+function topicConclusion(topic) {
+  const result = materiality(topic);
+  if (result === "material") return "Material sustainability matter";
+  if (result === "monitor") return "Monitor and reassess";
+  return "Below selected materiality thresholds";
+}
+
+function createTopicPageContent(topic, meta, pageNumber) {
+  const parts = [];
+  parts.push("0.96 0.98 0.97 rg 0 0 595.28 841.89 re f\n");
+  parts.push("1 1 1 rg 42 668 511 104 re f\n");
+  parts.push("0.85 0.88 0.86 RG 42 668 511 104 re S\n");
+  parts.push(textLine(`${topic.code} ${topic.title}`, 42, 806, 18, "0.08 0.13 0.11"));
+  parts.push(textLine(`${meta.companyName} | ${meta.reportingYear} CSRD double materiality assessment`, 42, 785, 9, "0.38 0.44 0.41"));
+  parts.push(textLine(topicConclusion(topic), 42, 742, 14, "0.12 0.48 0.34"));
+  parts.push(textLine(`Impact score ${scoreImpact(topic).toFixed(1)} / 5`, 42, 718, 11, "0.10 0.13 0.12"));
+  parts.push(textLine(`Financial score ${scoreFinancial(topic).toFixed(1)} / 5`, 230, 718, 11, "0.10 0.13 0.12"));
+  parts.push(textLine(`Evidence quality: ${topic.evidenceQuality}`, 410, 718, 11, "0.10 0.13 0.12"));
+
+  addKeyValue(parts, "ESRS mapping", topic.disclosure, 58, 650, 160);
+  addKeyValue(parts, "Category", topic.category, 230, 650, 120);
+  addKeyValue(parts, "Value chain", topic.valueChain, 365, 650, 150);
+  addKeyValue(parts, "Time horizon", topic.timeHorizon, 58, 604, 150);
+  addKeyValue(parts, "Owner", topic.owner, 230, 604, 120);
+  addKeyValue(parts, "Status", topic.status, 365, 604, 150);
+
+  addKeyValue(parts, "Impact scoring inputs", `Scale ${topic.impactScale}, scope ${topic.impactScope}, irremediability ${topic.impactIrremediability}, likelihood ${topic.impactLikelihood}`, 58, 558, 230);
+  addKeyValue(parts, "Financial scoring inputs", `Magnitude ${topic.financialMagnitude}, likelihood ${topic.financialLikelihood}`, 365, 558, 150);
+
+  let y = 494;
+  y = addWrappedText(parts, "Stakeholders consulted or affected", topic.stakeholders, 42, y, 92);
+  y = addWrappedText(parts, "Assessment rationale and evidence base", topic.evidence, 42, y, 92);
+  y = addWrappedText(
+    parts,
+    "Report-ready disclosure wording",
+    `${topic.title} was assessed for impact materiality and financial materiality across ${topic.valueChain.toLowerCase()}. The matter is classified as "${topicConclusion(topic)}" based on an impact score of ${scoreImpact(topic).toFixed(1)} and a financial score of ${scoreFinancial(topic).toFixed(1)} against thresholds of ${meta.impactThreshold.toFixed(1)} and ${meta.financialThreshold.toFixed(1)}. The assessment considered the stakeholder groups ${topic.stakeholders || "not documented"} and is supported by the following evidence: ${topic.evidence || "not documented"}.`,
+    42,
+    y,
+    94
+  );
+
+  parts.push("0.85 0.88 0.86 RG 42 100 m 553 100 l S\n");
+  parts.push(textLine("Prepared as an insertion-ready assessment record. Final sustainability statement wording should be reviewed against ESRS disclosure requirements and assurance evidence.", 42, 78, 7.5, "0.38 0.44 0.41"));
+  parts.push(textLine(`Page ${pageNumber}`, 518, 42, 8, "0.38 0.44 0.41"));
+  return parts.join("");
+}
+
+function createMatrixPageContent(meta, imageId) {
+  const pageWidth = 841.89;
+  const pageHeight = 595.28;
+  const imageWidth = 730;
+  const imageHeight = imageWidth * (refs.canvas.height / refs.canvas.width);
+  const imageX = 56;
+  const imageY = 72;
+  return [
+    "0.96 0.98 0.97 rg 0 0 841.89 595.28 re f\n",
+    textLine("Double Materiality Matrix", 56, 555, 22, "0.08 0.13 0.11"),
+    textLine(`${meta.companyName} | Sector: ${meta.sector} | Reporting year: ${meta.reportingYear}`, 56, 532, 10, "0.38 0.44 0.41"),
+    textLine(`Thresholds: impact ${meta.impactThreshold.toFixed(1)}, financial ${meta.financialThreshold.toFixed(1)} | Exported ${new Date(meta.exportedAt).toLocaleDateString()}`, 56, 515, 9, "0.38 0.44 0.41"),
+    `q ${imageWidth} 0 0 ${imageHeight} ${imageX} ${imageY} cm /Im1 Do Q\n`,
+    textLine("Material if either impact materiality or financial materiality meets the selected threshold. This PDF is a documentation aid and not legal advice or assurance.", 56, 42, 8, "0.38 0.44 0.41")
+  ].join("");
+}
+
+async function exportPdf() {
+  drawMatrix();
+  const meta = getCompanyMeta();
+  const pdf = new PdfDocument();
+  const catalogId = pdf.reserve();
+  const pagesId = pdf.reserve();
+  const fontId = pdf.reserve();
+  const imageId = pdf.reserve();
+  const matrixContentId = pdf.reserve();
+  const matrixPageId = pdf.reserve();
+  const pageIds = [matrixPageId];
+
+  const jpegBytes = base64ToBytes(refs.canvas.toDataURL("image/jpeg", 0.94).split(",")[1]);
+  pdf.setAscii(fontId, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  pdf.setStream(imageId, `/Type /XObject /Subtype /Image /Width ${refs.canvas.width} /Height ${refs.canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode`, jpegBytes);
+  pdf.setStream(matrixContentId, "", new TextEncoder().encode(createMatrixPageContent(meta, imageId)));
+  pdf.setAscii(matrixPageId, `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 841.89 595.28] /Resources << /Font << /F1 ${fontId} 0 R >> /XObject << /Im1 ${imageId} 0 R >> >> /Contents ${matrixContentId} 0 R >>`);
+
+  const rows = exportRows();
+  rows.forEach((row, index) => {
+    const topic = state.topics.find(item => item.code === row.code && item.title === row.title) || state.topics[index];
+    const contentId = pdf.reserve();
+    const pageId = pdf.reserve();
+    pageIds.push(pageId);
+    pdf.setStream(contentId, "", new TextEncoder().encode(createTopicPageContent(topic, meta, index + 2)));
+    pdf.setAscii(pageId, `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentId} 0 R >>`);
+  });
+
+  pdf.setAscii(pagesId, `<< /Type /Pages /Kids [${pageIds.map(id => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`);
+  pdf.setAscii(catalogId, `<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
+  download("csrd-materiality-assessment-report.pdf", pdf.build(catalogId));
+}
+
 function exportCsv() {
   const rows = exportRows();
   const headers = Object.keys(rows[0] || { code: "", title: "" });
@@ -368,6 +576,7 @@ refs.topicSearch.addEventListener("input", renderTopics);
 refs.impactThreshold.addEventListener("input", render);
 refs.financialThreshold.addEventListener("input", render);
 refs.includeOptional.addEventListener("change", renderSummary);
+document.querySelector("#exportPdfBtn").addEventListener("click", exportPdf);
 document.querySelector("#exportCsvBtn").addEventListener("click", exportCsv);
 document.querySelector("#saveJsonBtn").addEventListener("click", exportJson);
 document.querySelector("#exportSvgBtn").addEventListener("click", exportSvg);
