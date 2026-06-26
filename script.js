@@ -503,7 +503,8 @@ const refs = {
   impactThresholdOut: document.querySelector("#impactThresholdOut"),
   financialThresholdOut: document.querySelector("#financialThresholdOut"),
   includeOptional: document.querySelector("#includeOptional"),
-  languageSelect: document.querySelector("#languageSelect")
+  languageSelect: document.querySelector("#languageSelect"),
+  importExcelInput: document.querySelector("#importExcelInput")
 };
 
 function lang() {
@@ -520,6 +521,16 @@ function format(key, values) {
 
 function optionLabel(value) {
   return (optionTranslations[lang()] && optionTranslations[lang()][value]) || value;
+}
+
+function canonicalOption(value, choices) {
+  const normalized = String(value ?? "").trim();
+  if (choices.includes(normalized)) return normalized;
+  for (const dictionary of Object.values(optionTranslations)) {
+    const match = Object.entries(dictionary).find(([, label]) => label === normalized);
+    if (match && choices.includes(match[0])) return match[0];
+  }
+  return choices[0];
 }
 
 function setText(selector, value) {
@@ -867,6 +878,150 @@ function htmlEscape(value) {
     .replaceAll('"', "&quot;");
 }
 
+function numberFromText(value, fallback = 3) {
+  const match = String(value ?? "").replace(",", ".").match(/-?\d+(\.\d+)?/);
+  const number = match ? Number(match[0]) : fallback;
+  return Number.isFinite(number) ? number : fallback;
+}
+
+function clampScore(value) {
+  return Math.max(1, Math.min(5, Math.round(numberFromText(value))));
+}
+
+function createTopicFromImport(topic) {
+  const impactFallback = clampScore(topic.impactScore);
+  const financialFallback = clampScore(topic.financialScore);
+  return {
+    id: crypto.randomUUID(),
+    code: String(topic.code || "NEW"),
+    title: String(topic.title || t("newTopic")),
+    category: canonicalOption(topic.category, categories),
+    valueChain: canonicalOption(topic.valueChain, valueChains),
+    stakeholders: String(topic.stakeholders || ""),
+    owner: String(topic.owner || ""),
+    timeHorizon: canonicalOption(topic.timeHorizon, horizons),
+    status: canonicalOption(topic.status, statuses),
+    impactScale: clampScore(topic.impactScale ?? impactFallback),
+    impactScope: clampScore(topic.impactScope ?? impactFallback),
+    impactIrremediability: clampScore(topic.impactIrremediability ?? impactFallback),
+    impactLikelihood: clampScore(topic.impactLikelihood ?? impactFallback),
+    financialMagnitude: clampScore(topic.financialMagnitude ?? financialFallback),
+    financialLikelihood: clampScore(topic.financialLikelihood ?? financialFallback),
+    evidenceQuality: canonicalOption(topic.evidenceQuality, evidenceQualities),
+    disclosure: String(topic.disclosure || ""),
+    evidence: String(topic.evidence || "")
+  };
+}
+
+function assessmentPayload() {
+  return {
+    version: 1,
+    meta: getCompanyMeta(),
+    language: lang(),
+    includeOptional: refs.includeOptional.checked,
+    topics: exportRows()
+  };
+}
+
+function applyAssessmentPayload(payload) {
+  const meta = payload.meta || {};
+  if (payload.language && translations[payload.language]) refs.languageSelect.value = payload.language;
+  if (meta.companyName !== undefined) document.querySelector("#companyName").value = meta.companyName;
+  if (meta.sector !== undefined) document.querySelector("#sector").value = meta.sector;
+  if (meta.reportingYear !== undefined) document.querySelector("#reportingYear").value = meta.reportingYear;
+  if (meta.owner !== undefined) document.querySelector("#owner").value = meta.owner;
+  if (meta.impactThreshold !== undefined) refs.impactThreshold.value = numberFromText(meta.impactThreshold, refs.impactThreshold.value);
+  if (meta.financialThreshold !== undefined) refs.financialThreshold.value = numberFromText(meta.financialThreshold, refs.financialThreshold.value);
+  if (payload.includeOptional !== undefined) refs.includeOptional.checked = Boolean(payload.includeOptional);
+  if (Array.isArray(payload.topics) && payload.topics.length) {
+    state.topics = payload.topics.map(createTopicFromImport);
+  }
+  render();
+}
+
+function textAt(cells, index) {
+  return cells[index]?.textContent.trim() || "";
+}
+
+function fallbackPayloadFromExcel(doc) {
+  const tables = [...doc.querySelectorAll("table")];
+  if (tables.length < 2) throw new Error("No importable assessment tables found.");
+  const metaRows = [...tables[0].querySelectorAll("tr")].map(row => [...row.cells]);
+  const topicsRows = [...tables[1].querySelectorAll("tbody tr")];
+  const meta = {
+    companyName: textAt(metaRows[0], 1),
+    sector: textAt(metaRows[1], 1),
+    reportingYear: textAt(metaRows[2], 1),
+    owner: textAt(metaRows[3], 1),
+    impactThreshold: numberFromText(textAt(metaRows[4], 1), refs.impactThreshold.value),
+    financialThreshold: numberFromText(textAt(metaRows[5], 1), refs.financialThreshold.value)
+  };
+  const topics = topicsRows.map(row => {
+    const cells = [...row.cells];
+    if (cells.length >= 20) {
+      return {
+        code: textAt(cells, 0),
+        title: textAt(cells, 1),
+        category: textAt(cells, 2),
+        valueChain: textAt(cells, 3),
+        stakeholders: textAt(cells, 4),
+        owner: textAt(cells, 5),
+        timeHorizon: textAt(cells, 6),
+        status: textAt(cells, 7),
+        impactScale: textAt(cells, 8),
+        impactScope: textAt(cells, 9),
+        impactIrremediability: textAt(cells, 10),
+        impactLikelihood: textAt(cells, 11),
+        impactScore: textAt(cells, 12),
+        financialMagnitude: textAt(cells, 13),
+        financialLikelihood: textAt(cells, 14),
+        financialScore: textAt(cells, 15),
+        evidenceQuality: textAt(cells, 17),
+        disclosure: textAt(cells, 18),
+        evidence: textAt(cells, 19)
+      };
+    }
+    return {
+      code: textAt(cells, 0),
+      title: textAt(cells, 1),
+      category: textAt(cells, 2),
+      valueChain: textAt(cells, 3),
+      stakeholders: textAt(cells, 4),
+      owner: textAt(cells, 5),
+      timeHorizon: textAt(cells, 6),
+      status: textAt(cells, 7),
+      impactScore: textAt(cells, 8),
+      financialScore: textAt(cells, 9),
+      evidenceQuality: textAt(cells, 11),
+      disclosure: textAt(cells, 12),
+      evidence: textAt(cells, 13)
+    };
+  });
+  return { meta, topics, includeOptional: true };
+}
+
+function parseAssessmentImport(text) {
+  const doc = new DOMParser().parseFromString(text, "text/html");
+  const dataNode = doc.querySelector("#assessmentData");
+  const embeddedData = dataNode?.value || dataNode?.textContent || "";
+  if (embeddedData.trim()) return JSON.parse(embeddedData);
+  return fallbackPayloadFromExcel(doc);
+}
+
+function importExcelFile(file) {
+  const reader = new FileReader();
+  reader.addEventListener("load", () => {
+    try {
+      applyAssessmentPayload(parseAssessmentImport(String(reader.result || "")));
+    } catch (error) {
+      alert(`Import failed: ${error.message}`);
+    } finally {
+      refs.importExcelInput.value = "";
+    }
+  });
+  reader.readAsText(file);
+}
+
 function download(filename, blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -1130,6 +1285,7 @@ function exportExcel() {
   const sourceUrl = getSourceUrl();
   const rows = exportRows();
   const materialRows = rows.filter(row => row.materiality === "material");
+  const importData = htmlEscape(JSON.stringify(assessmentPayload()));
   const headers = [
     "code",
     "title",
@@ -1188,6 +1344,7 @@ function exportExcel() {
   </style>
 </head>
 <body>
+  <textarea id="assessmentData" style="display:none">${importData}</textarea>
   <h1>${htmlEscape(t("title"))}</h1>
   <h2>${htmlEscape(t("overviewSheet"))}</h2>
   <table class="meta">
@@ -1274,6 +1431,11 @@ refs.impactThreshold.addEventListener("input", render);
 refs.financialThreshold.addEventListener("input", render);
 refs.includeOptional.addEventListener("change", renderSummary);
 refs.languageSelect.addEventListener("change", render);
+document.querySelector("#importExcelBtn").addEventListener("click", () => refs.importExcelInput.click());
+refs.importExcelInput.addEventListener("change", event => {
+  const [file] = event.target.files;
+  if (file) importExcelFile(file);
+});
 document.querySelector("#exportPdfBtn").addEventListener("click", exportPdf);
 document.querySelector("#exportExcelBtn").addEventListener("click", exportExcel);
 document.querySelector("#exportSvgBtn").addEventListener("click", exportSvg);
