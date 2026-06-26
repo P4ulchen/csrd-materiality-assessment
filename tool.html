@@ -8,27 +8,22 @@
   </head>
   <body>
     <header class="topbar">
-      <div>
+      <a id="brandHomeLink" class="topbar-brand" href="index.html?lang=en" aria-label="Overview">
         <p class="eyebrow">CSRD and ESRS workspace</p>
         <h1>Double Materiality Assessment</h1>
-      </div>
-      <a id="homeLink" class="home-link" href="index.html?lang=en">Overview</a>
-      <label class="language-control">
-        Language
-        <select id="languageSelect" aria-label="Language">
-          <option value="en">English</option>
-          <option value="de">Deutsch</option>
-          <option value="fr">Francais</option>
-          <option value="es">Espanol</option>
-        </select>
-      </label>
-      <div class="top-actions" aria-label="Export actions">
-        <button id="importExcelBtn" class="ghost" type="button" title="Re-import a previous Excel export">Re-Import Excel</button>
-        <input id="importExcelInput" type="file" accept=".xls,.html,.htm,application/vnd.ms-excel" hidden>
-        <button id="exportPdfBtn" type="button" title="Export report-ready PDF">PDF</button>
-        <button id="exportExcelBtn" class="ghost" type="button" title="Export assessment as Excel">Excel</button>
-        <button id="exportSvgBtn" class="ghost" type="button" title="Export matrix as SVG">SVG</button>
-        <button id="exportPngBtn" class="ghost" type="button" title="Export matrix as PNG">PNG</button>
+      </a>
+      <div class="topbar-controls">
+        <div class="topbar-nav">
+          <label class="language-control">
+            Language
+            <select id="languageSelect" aria-label="Language">
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="fr">Francais</option>
+              <option value="es">Espanol</option>
+            </select>
+          </label>
+        </div>
       </div>
     </header>
 
@@ -82,11 +77,29 @@
       </aside>
 
       <section class="workspace">
-        <nav class="tabs" aria-label="Views">
-          <button class="tab active" type="button" data-view="matrixView">Matrix</button>
-          <button class="tab" type="button" data-view="topicsView">Topics</button>
-          <button class="tab" type="button" data-view="methodView">Method</button>
-        </nav>
+        <div class="workspace-toolbar">
+          <div class="top-actions" aria-label="Import and export actions">
+            <div class="action-group import-group" aria-label="Import actions">
+              <span class="action-label">Re-Import</span>
+              <button id="importExcelBtn" class="ghost" type="button" title="Re-import a previous Excel export">Excel</button>
+            </div>
+            <input id="importExcelInput" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+            <div class="action-group export-group" aria-label="Export actions">
+              <span class="action-label">Export</span>
+              <div class="button-row">
+                <button id="exportPdfBtn" type="button" title="Export report-ready PDF">PDF</button>
+                <button id="exportExcelBtn" class="ghost" type="button" title="Export assessment as Excel">Excel</button>
+                <button id="exportSvgBtn" class="ghost" type="button" title="Export matrix as SVG">SVG</button>
+                <button id="exportPngBtn" class="ghost" type="button" title="Export matrix as PNG">PNG</button>
+              </div>
+            </div>
+          </div>
+          <nav class="tabs" aria-label="Views">
+            <button class="tab active" type="button" data-view="matrixView">Matrix</button>
+            <button class="tab" type="button" data-view="topicsView">Topics</button>
+            <button class="tab" type="button" data-view="methodView">Method</button>
+          </nav>
+        </div>
 
         <section id="matrixView" class="view active">
           <div class="matrix-layout">
@@ -179,15 +192,15 @@
         <div class="score-grid">
           <fieldset>
             <legend>Impact materiality</legend>
-            <label>Scale<span class="slider-control"><input class="score impactScale" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
-            <label>Scope<span class="slider-control"><input class="score impactScope" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
-            <label>Irremediability<span class="slider-control"><input class="score impactIrremediability" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
-            <label>Likelihood<span class="slider-control"><input class="score impactLikelihood" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
+            <label>Scale<span class="slider-control"><input class="score impactScale" type="range" min="1" max="5" step="0.1"><output class="slider-value">3.0</output></span></label>
+            <label>Scope<span class="slider-control"><input class="score impactScope" type="range" min="1" max="5" step="0.1"><output class="slider-value">3.0</output></span></label>
+            <label>Irremediability<span class="slider-control"><input class="score impactIrremediability" type="range" min="1" max="5" step="0.1"><output class="slider-value">3.0</output></span></label>
+            <label>Likelihood<span class="slider-control"><input class="score impactLikelihood" type="range" min="1" max="5" step="0.1"><output class="slider-value">3.0</output></span></label>
           </fieldset>
           <fieldset>
             <legend>Financial materiality</legend>
-            <label>Magnitude<span class="slider-control"><input class="score financialMagnitude" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
-            <label>Likelihood<span class="slider-control"><input class="score financialLikelihood" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
+            <label>Magnitude<span class="slider-control"><input class="score financialMagnitude" type="range" min="1" max="5" step="0.1"><output class="slider-value">3.0</output></span></label>
+            <label>Likelihood<span class="slider-control"><input class="score financialLikelihood" type="range" min="1" max="5" step="0.1"><output class="slider-value">3.0</output></span></label>
             <label>Evidence quality<select class="evidenceQuality"></select></label>
             <label>Disclosure mapping<input class="disclosure" type="text"></label>
           </fieldset>

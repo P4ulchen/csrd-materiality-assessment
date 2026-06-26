@@ -9,21 +9,24 @@
   </head>
   <body>
     <header class="topbar">
-      <div>
+      <a id="brandHomeLink" class="topbar-brand" href="index.html?lang=en" aria-label="Overview">
         <p class="eyebrow" data-i18n="eyebrow">CSRD and ESRS workspace</p>
         <h1 data-i18n="title">Tool Guide</h1>
+      </a>
+      <div class="topbar-controls">
+        <div class="topbar-nav">
+          <a id="toolLink" class="home-link" href="tool.html?lang=en" data-i18n="tool">Tool</a>
+          <label class="language-control">
+            <span data-i18n="language">Language</span>
+            <select id="articleLanguageSelect" aria-label="Language">
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="fr">Francais</option>
+              <option value="es">Espanol</option>
+            </select>
+          </label>
+        </div>
       </div>
-      <a id="homeLink" class="home-link" href="index.html?lang=en" data-i18n="overview">Overview</a>
-      <a id="toolLink" class="home-link" href="tool.html?lang=en" data-i18n="tool">Tool</a>
-      <label class="language-control">
-        <span data-i18n="language">Language</span>
-        <select id="articleLanguageSelect" aria-label="Language">
-          <option value="en">English</option>
-          <option value="de">Deutsch</option>
-          <option value="fr">Francais</option>
-          <option value="es">Espanol</option>
-        </select>
-      </label>
     </header>
     <main class="guide-shell">
       <article id="article" class="guide-article"></article>
@@ -109,7 +112,7 @@
       };
       const selector = document.querySelector("#articleLanguageSelect");
       const article = document.querySelector("#article");
-      const links = { home: document.querySelector("#homeLink"), tool: document.querySelector("#toolLink") };
+      const links = { home: document.querySelector("#brandHomeLink"), tool: document.querySelector("#toolLink") };
       function setLanguage(language) {
         const active = translations[language] ? language : "en";
         const t = translations[active];
@@ -118,6 +121,7 @@
         document.querySelectorAll("[data-i18n]").forEach(element => element.textContent = t[element.dataset.i18n]);
         article.innerHTML = t.article;
         selector.value = active;
+        links.home.setAttribute("aria-label", t.overview);
         links.home.href = `index.html?lang=${active}`;
         links.tool.href = `tool.html?lang=${active}`;
       }

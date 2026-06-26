@@ -90,7 +90,7 @@ const translations = {
     notDocumented: "Not documented",
     page: "Page",
     pdfFile: "csrd-materiality-assessment-report.pdf",
-    excelFile: "csrd-materiality-assessment.xls",
+    excelFile: "csrd-materiality-assessment.xlsx",
     sourcePage: "Source page",
     sourceLinkText: "Assessment tool",
     overviewSheet: "Overview",
@@ -186,7 +186,7 @@ const translations = {
     notDocumented: "Nicht dokumentiert",
     page: "Seite",
     pdfFile: "csrd-wesentlichkeitsanalyse-bericht.pdf",
-    excelFile: "csrd-wesentlichkeitsanalyse.xls",
+    excelFile: "csrd-wesentlichkeitsanalyse.xlsx",
     sourcePage: "Quellseite",
     sourceLinkText: "Assessment-Tool",
     overviewSheet: "Uebersicht",
@@ -282,7 +282,7 @@ const translations = {
     notDocumented: "Non documente",
     page: "Page",
     pdfFile: "rapport-evaluation-materialite-csrd.pdf",
-    excelFile: "rapport-evaluation-materialite-csrd.xls",
+    excelFile: "rapport-evaluation-materialite-csrd.xlsx",
     sourcePage: "Page source",
     sourceLinkText: "Outil d'evaluation",
     overviewSheet: "Apercu",
@@ -378,7 +378,7 @@ const translations = {
     notDocumented: "No documentado",
     page: "Pagina",
     pdfFile: "informe-evaluacion-materialidad-csrd.pdf",
-    excelFile: "informe-evaluacion-materialidad-csrd.xls",
+    excelFile: "informe-evaluacion-materialidad-csrd.xlsx",
     sourcePage: "Pagina de origen",
     sourceLinkText: "Herramienta de evaluacion",
     overviewSheet: "Resumen",
@@ -548,10 +548,10 @@ function translateStaticUi() {
   document.title = t("title");
   setText(".topbar .eyebrow", t("appEyebrow"));
   setText("h1", t("title"));
-  const homeLink = document.querySelector("#homeLink");
-  if (homeLink) {
-    homeLink.textContent = t("overview");
-    homeLink.href = `index.html?lang=${lang()}`;
+  const brandHomeLink = document.querySelector("#brandHomeLink");
+  if (brandHomeLink) {
+    brandHomeLink.setAttribute("aria-label", t("overview"));
+    brandHomeLink.href = `index.html?lang=${lang()}`;
   }
   document.querySelector(".language-control").firstChild.textContent = `${t("language")} `;
   setText(".sidebar .panel:nth-of-type(1) h2", t("company"));
@@ -643,11 +643,26 @@ function optionList(values, selected) {
   return values.map(value => `<option value="${value}" ${value === selected ? "selected" : ""}>${optionLabel(value)}</option>`).join("");
 }
 
-function updateTopic(id, key, value) {
+function formatScoreInput(value) {
+  return Number(value).toFixed(1);
+}
+
+function updateTopic(id, key, value, shouldRender = true) {
   const topic = state.topics.find(item => item.id === id);
   if (!topic) return;
   topic[key] = value;
-  render();
+  if (shouldRender) render();
+  return topic;
+}
+
+function refreshTopicCardStatus(node, topic) {
+  const impact = scoreImpact(topic).toFixed(1);
+  const financial = scoreFinancial(topic).toFixed(1);
+  const result = materiality(topic);
+  node.querySelector(".scoreBadge").textContent = format("scoresBadge", { impact, financial });
+  const badge = node.querySelector(".materialityBadge");
+  badge.textContent = result === "material" ? t("material") : result === "monitor" ? t("monitor") : t("optional");
+  badge.className = `materialityBadge ${result}`;
 }
 
 function createTopicCard(topic) {
@@ -656,8 +671,18 @@ function createTopicCard(topic) {
     const input = node.querySelector(selector);
     const output = input.closest(".slider-control")?.querySelector(".slider-value");
     input.value = topic[key];
-    if (output) output.value = topic[key];
-    input.addEventListener("input", event => updateTopic(topic.id, key, event.target.value));
+    if (output) output.value = formatScoreInput(topic[key]);
+    input.addEventListener("input", event => {
+      if (!output) {
+        updateTopic(topic.id, key, event.target.value);
+        return;
+      }
+      const updatedTopic = updateTopic(topic.id, key, event.target.value, false);
+      output.value = formatScoreInput(event.target.value);
+      refreshTopicCardStatus(node, updatedTopic);
+      drawMatrix();
+      renderSummary();
+    });
   };
   const bindSelect = (selector, key, values) => {
     const input = node.querySelector(selector);
@@ -698,13 +723,7 @@ function createTopicCard(topic) {
   bindSelect(".status", "status", statuses);
   bindSelect(".evidenceQuality", "evidenceQuality", evidenceQualities);
 
-  const impact = scoreImpact(topic).toFixed(1);
-  const financial = scoreFinancial(topic).toFixed(1);
-  const result = materiality(topic);
-  node.querySelector(".scoreBadge").textContent = format("scoresBadge", { impact, financial });
-  const badge = node.querySelector(".materialityBadge");
-  badge.textContent = result === "material" ? t("material") : result === "monitor" ? t("monitor") : t("optional");
-  badge.className = `materialityBadge ${result}`;
+  refreshTopicCardStatus(node, topic);
   node.querySelector(".remove").addEventListener("click", () => {
     state.topics = state.topics.filter(item => item.id !== topic.id);
     render();
@@ -878,6 +897,15 @@ function htmlEscape(value) {
     .replaceAll('"', "&quot;");
 }
 
+function xmlEscape(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
 function numberFromText(value, fallback = 3) {
   const match = String(value ?? "").replace(",", ".").match(/-?\d+(\.\d+)?/);
   const number = match ? Number(match[0]) : fallback;
@@ -885,7 +913,8 @@ function numberFromText(value, fallback = 3) {
 }
 
 function clampScore(value) {
-  return Math.max(1, Math.min(5, Math.round(numberFromText(value))));
+  const clamped = Math.max(1, Math.min(5, numberFromText(value)));
+  return Number(clamped.toFixed(1));
 }
 
 function createTopicFromImport(topic) {
@@ -939,87 +968,65 @@ function applyAssessmentPayload(payload) {
   render();
 }
 
-function textAt(cells, index) {
-  return cells[index]?.textContent.trim() || "";
+function readUint16(bytes, offset) {
+  return bytes[offset] | (bytes[offset + 1] << 8);
 }
 
-function fallbackPayloadFromExcel(doc) {
-  const tables = [...doc.querySelectorAll("table")];
-  if (tables.length < 2) throw new Error("No importable assessment tables found.");
-  const metaRows = [...tables[0].querySelectorAll("tr")].map(row => [...row.cells]);
-  const topicsRows = [...tables[1].querySelectorAll("tbody tr")];
-  const meta = {
-    companyName: textAt(metaRows[0], 1),
-    sector: textAt(metaRows[1], 1),
-    reportingYear: textAt(metaRows[2], 1),
-    owner: textAt(metaRows[3], 1),
-    impactThreshold: numberFromText(textAt(metaRows[4], 1), refs.impactThreshold.value),
-    financialThreshold: numberFromText(textAt(metaRows[5], 1), refs.financialThreshold.value)
-  };
-  const topics = topicsRows.map(row => {
-    const cells = [...row.cells];
-    if (cells.length >= 20) {
-      return {
-        code: textAt(cells, 0),
-        title: textAt(cells, 1),
-        category: textAt(cells, 2),
-        valueChain: textAt(cells, 3),
-        stakeholders: textAt(cells, 4),
-        owner: textAt(cells, 5),
-        timeHorizon: textAt(cells, 6),
-        status: textAt(cells, 7),
-        impactScale: textAt(cells, 8),
-        impactScope: textAt(cells, 9),
-        impactIrremediability: textAt(cells, 10),
-        impactLikelihood: textAt(cells, 11),
-        impactScore: textAt(cells, 12),
-        financialMagnitude: textAt(cells, 13),
-        financialLikelihood: textAt(cells, 14),
-        financialScore: textAt(cells, 15),
-        evidenceQuality: textAt(cells, 17),
-        disclosure: textAt(cells, 18),
-        evidence: textAt(cells, 19)
-      };
+function readUint32(bytes, offset) {
+  return (bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24)) >>> 0;
+}
+
+function unzipStoredEntries(bytes) {
+  const decoder = new TextDecoder();
+  const entries = {};
+  let offset = 0;
+  while (offset < bytes.length - 30) {
+    if (readUint32(bytes, offset) !== 0x04034b50) break;
+    const method = readUint16(bytes, offset + 8);
+    const compressedSize = readUint32(bytes, offset + 18);
+    const uncompressedSize = readUint32(bytes, offset + 22);
+    const nameLength = readUint16(bytes, offset + 26);
+    const extraLength = readUint16(bytes, offset + 28);
+    const name = decoder.decode(bytes.slice(offset + 30, offset + 30 + nameLength));
+    const dataStart = offset + 30 + nameLength + extraLength;
+    if (method === 0) {
+      entries[name] = bytes.slice(dataStart, dataStart + uncompressedSize);
     }
-    return {
-      code: textAt(cells, 0),
-      title: textAt(cells, 1),
-      category: textAt(cells, 2),
-      valueChain: textAt(cells, 3),
-      stakeholders: textAt(cells, 4),
-      owner: textAt(cells, 5),
-      timeHorizon: textAt(cells, 6),
-      status: textAt(cells, 7),
-      impactScore: textAt(cells, 8),
-      financialScore: textAt(cells, 9),
-      evidenceQuality: textAt(cells, 11),
-      disclosure: textAt(cells, 12),
-      evidence: textAt(cells, 13)
-    };
-  });
-  return { meta, topics, includeOptional: true };
+    offset = dataStart + compressedSize;
+  }
+  return entries;
 }
 
-function parseAssessmentImport(text) {
-  const doc = new DOMParser().parseFromString(text, "text/html");
-  const dataNode = doc.querySelector("#assessmentData");
-  const embeddedData = dataNode?.value || dataNode?.textContent || "";
-  if (embeddedData.trim()) return JSON.parse(embeddedData);
-  return fallbackPayloadFromExcel(doc);
+function textFromSheetCell(cell) {
+  const inlineText = cell.querySelector("is t")?.textContent;
+  if (inlineText !== undefined) return inlineText;
+  return cell.querySelector("v")?.textContent || "";
+}
+
+function parseXlsxImport(buffer) {
+  const entries = unzipStoredEntries(new Uint8Array(buffer));
+  const sheet = entries["xl/worksheets/sheet3.xml"];
+  if (!sheet) throw new Error("No import data sheet found.");
+  const xml = new TextDecoder().decode(sheet);
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const firstCell = doc.querySelector("sheetData row c");
+  const payload = textFromSheetCell(firstCell || doc.createElement("c"));
+  if (!payload.trim()) throw new Error("No import data found.");
+  return JSON.parse(payload);
 }
 
 function importExcelFile(file) {
   const reader = new FileReader();
   reader.addEventListener("load", () => {
     try {
-      applyAssessmentPayload(parseAssessmentImport(String(reader.result || "")));
+      applyAssessmentPayload(parseXlsxImport(reader.result));
     } catch (error) {
       alert(`Import failed: ${error.message}`);
     } finally {
       refs.importExcelInput.value = "";
     }
   });
-  reader.readAsText(file);
+  reader.readAsArrayBuffer(file);
 }
 
 function download(filename, blob) {
@@ -1262,22 +1269,191 @@ async function exportPdf() {
   download(t("pdfFile"), pdf.build(catalogId));
 }
 
-function excelCell(value) {
-  return `<td>${htmlEscape(value)}</td>`;
+const crcTable = Array.from({ length: 256 }, (_, index) => {
+  let crc = index;
+  for (let bit = 0; bit < 8; bit += 1) crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
+  return crc >>> 0;
+});
+
+function crc32(bytes) {
+  let crc = 0xffffffff;
+  bytes.forEach(byte => {
+    crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  });
+  return (crc ^ 0xffffffff) >>> 0;
 }
 
-function excelTextCell(value) {
-  return `<td style="mso-number-format:'\\@';">${htmlEscape(value)}</td>`;
+function pushUint16(target, value) {
+  target.push(value & 0xff, (value >>> 8) & 0xff);
 }
 
-function excelNumberCell(value) {
+function pushUint32(target, value) {
+  target.push(value & 0xff, (value >>> 8) & 0xff, (value >>> 16) & 0xff, (value >>> 24) & 0xff);
+}
+
+function concatBytes(chunks) {
+  const length = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+  const bytes = new Uint8Array(length);
+  let offset = 0;
+  chunks.forEach(chunk => {
+    bytes.set(chunk, offset);
+    offset += chunk.length;
+  });
+  return bytes;
+}
+
+function createZip(files) {
+  const encoder = new TextEncoder();
+  const localChunks = [];
+  const centralChunks = [];
+  let offset = 0;
+
+  files.forEach(file => {
+    const nameBytes = encoder.encode(file.name);
+    const dataBytes = typeof file.data === "string" ? encoder.encode(file.data) : file.data;
+    const crc = crc32(dataBytes);
+    const local = [];
+    pushUint32(local, 0x04034b50);
+    pushUint16(local, 20);
+    pushUint16(local, 0x0800);
+    pushUint16(local, 0);
+    pushUint16(local, 0);
+    pushUint16(local, 0);
+    pushUint32(local, crc);
+    pushUint32(local, dataBytes.length);
+    pushUint32(local, dataBytes.length);
+    pushUint16(local, nameBytes.length);
+    pushUint16(local, 0);
+    const localHeader = new Uint8Array([...local, ...nameBytes]);
+    localChunks.push(localHeader, dataBytes);
+
+    const central = [];
+    pushUint32(central, 0x02014b50);
+    pushUint16(central, 20);
+    pushUint16(central, 20);
+    pushUint16(central, 0x0800);
+    pushUint16(central, 0);
+    pushUint16(central, 0);
+    pushUint16(central, 0);
+    pushUint32(central, crc);
+    pushUint32(central, dataBytes.length);
+    pushUint32(central, dataBytes.length);
+    pushUint16(central, nameBytes.length);
+    pushUint16(central, 0);
+    pushUint16(central, 0);
+    pushUint16(central, 0);
+    pushUint16(central, 0);
+    pushUint32(central, 0);
+    pushUint32(central, offset);
+    centralChunks.push(new Uint8Array([...central, ...nameBytes]));
+    offset += localHeader.length + dataBytes.length;
+  });
+
+  const centralDirectory = concatBytes(centralChunks);
+  const end = [];
+  pushUint32(end, 0x06054b50);
+  pushUint16(end, 0);
+  pushUint16(end, 0);
+  pushUint16(end, files.length);
+  pushUint16(end, files.length);
+  pushUint32(end, centralDirectory.length);
+  pushUint32(end, offset);
+  pushUint16(end, 0);
+  return concatBytes([...localChunks, centralDirectory, new Uint8Array(end)]);
+}
+
+function stylesXml() {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="4">
+    <font><sz val="11"/><color rgb="FF16201D"/><name val="Calibri"/></font>
+    <font><b/><sz val="15"/><color rgb="FF16201D"/><name val="Calibri"/></font>
+    <font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>
+    <font><b/><sz val="11"/><color rgb="FF16201D"/><name val="Calibri"/></font>
+  </fonts>
+  <fills count="4">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF1F7A56"/><bgColor indexed="64"/></patternFill></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FFEDF3F0"/><bgColor indexed="64"/></patternFill></fill>
+  </fills>
+  <borders count="2">
+    <border><left/><right/><top/><bottom/><diagonal/></border>
+    <border><left style="thin"><color rgb="FFD7E1DC"/></left><right style="thin"><color rgb="FFD7E1DC"/></right><top style="thin"><color rgb="FFD7E1DC"/></top><bottom style="thin"><color rgb="FFD7E1DC"/></bottom><diagonal/></border>
+  </borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="8">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+    <xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="center"/></xf>
+    <xf numFmtId="0" fontId="3" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top"/></xf>
+    <xf numFmtId="2" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/>
+    <xf numFmtId="1" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1"/>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf>
+  </cellXfs>
+  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+}
+
+function worksheetXml(rows, options = {}) {
+  const cellName = (rowIndex, colIndex) => {
+    let col = "";
+    let n = colIndex + 1;
+    while (n > 0) {
+      const mod = (n - 1) % 26;
+      col = String.fromCharCode(65 + mod) + col;
+      n = Math.floor((n - mod) / 26);
+    }
+    return `${col}${rowIndex + 1}`;
+  };
+  const maxColumns = Math.max(1, ...rows.map(row => row.length));
+  const lastCell = cellName(Math.max(rows.length - 1, 0), maxColumns - 1);
+  const columnXml = options.columns?.length
+    ? `<cols>${options.columns.map((width, index) => `<col min="${index + 1}" max="${index + 1}" width="${width}" customWidth="1"/>`).join("")}</cols>`
+    : "";
+  const sheetViewXml = options.freezeRows
+    ? `<sheetViews><sheetView workbookViewId="0"><pane ySplit="${options.freezeRows}" topLeftCell="A${options.freezeRows + 1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>`
+    : "";
+  const xmlRows = rows.map((row, rowIndex) => {
+    const cells = row.map((cell, colIndex) => {
+      const value = typeof cell === "object" && cell !== null ? cell.value : cell;
+      const type = typeof cell === "object" && cell !== null ? cell.type : "text";
+      const style = typeof cell === "object" && cell !== null && cell.style !== undefined ? ` s="${cell.style}"` : "";
+      const ref = cellName(rowIndex, colIndex);
+      if (type === "number") return `<c r="${ref}"${style}><v>${xmlEscape(value)}</v></c>`;
+      return `<c r="${ref}" t="inlineStr"${style}><is><t>${xmlEscape(value)}</t></is></c>`;
+    }).join("");
+    return `<row r="${rowIndex + 1}">${cells}</row>`;
+  }).join("");
+  const autoFilterXml = options.autoFilter ? `<autoFilter ref="A1:${lastCell}"/>` : "";
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><dimension ref="A1:${lastCell}"/>${sheetViewXml}${columnXml}<sheetData>${xmlRows}</sheetData>${autoFilterXml}</worksheet>`;
+}
+
+function workbookXml() {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="${xmlEscape(t("overviewSheet"))}" sheetId="1" r:id="rId1"/><sheet name="${xmlEscape(t("topicsSheet"))}" sheetId="2" r:id="rId2"/><sheet name="ImportData" sheetId="3" state="hidden" r:id="rId3"/></sheets></workbook>`;
+}
+
+function buildXlsx(rowsBySheet) {
+  return createZip([
+    { name: "[Content_Types].xml", data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet3.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>` },
+    { name: "_rels/.rels", data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>` },
+    { name: "xl/workbook.xml", data: workbookXml() },
+    { name: "xl/styles.xml", data: stylesXml() },
+    { name: "xl/_rels/workbook.xml.rels", data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet3.xml"/><Relationship Id="rId4" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>` },
+    { name: "xl/worksheets/sheet1.xml", data: worksheetXml(rowsBySheet.overview, { columns: [28, 72] }) },
+    { name: "xl/worksheets/sheet2.xml", data: worksheetXml(rowsBySheet.topics, { columns: [10, 28, 18, 22, 28, 20, 18, 18, 12, 12, 16, 12, 14, 14, 14, 14, 14, 18, 34, 48], freezeRows: 1, autoFilter: true }) },
+    { name: "xl/worksheets/sheet3.xml", data: worksheetXml(rowsBySheet.importData, { columns: [12] }) }
+  ]);
+}
+
+function xlsxText(value, style = 4) {
+  return { value, style };
+}
+
+function xlsxNumber(value, style = 5) {
   const number = Number(value);
-  const normalized = Number.isFinite(number) ? String(number).replace(",", ".") : "0";
-  return `<td style="mso-number-format:'0.00';" x:num="${htmlEscape(normalized)}">${htmlEscape(normalized)}</td>`;
-}
-
-function excelIntegerCell(value) {
-  return `<td style="mso-number-format:'0';" x:num="${htmlEscape(value)}">${htmlEscape(value)}</td>`;
+  return { value: Number.isFinite(number) ? number : 0, type: "number", style };
 }
 
 function exportExcel() {
@@ -1285,7 +1461,6 @@ function exportExcel() {
   const sourceUrl = getSourceUrl();
   const rows = exportRows();
   const materialRows = rows.filter(row => row.materiality === "material");
-  const importData = htmlEscape(JSON.stringify(assessmentPayload()));
   const headers = [
     "code",
     "title",
@@ -1330,50 +1505,38 @@ function exportExcel() {
     t("disclosureMapping"),
     t("evidenceRationale")
   ];
-  const html = `<!doctype html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
-<head>
-  <meta charset="utf-8">
-  <style>
-    body { font-family: Arial, sans-serif; }
-    h1, h2 { color: #16201d; }
-    table { border-collapse: collapse; margin-bottom: 24px; }
-    th { background: #1f7a56; color: #fff; font-weight: bold; }
-    th, td { border: 1px solid #d9e0dd; padding: 6px 8px; vertical-align: top; }
-    .meta th { background: #edf3f0; color: #16201d; text-align: left; }
-  </style>
-</head>
-<body>
-  <textarea id="assessmentData" style="display:none">${importData}</textarea>
-  <h1>${htmlEscape(t("title"))}</h1>
-  <h2>${htmlEscape(t("overviewSheet"))}</h2>
-  <table class="meta">
-    <tr><th>${htmlEscape(t("companyName"))}</th>${excelTextCell(meta.companyName)}</tr>
-    <tr><th>${htmlEscape(t("sector"))}</th>${excelTextCell(meta.sector)}</tr>
-    <tr><th>${htmlEscape(t("reportingYear"))}</th>${excelIntegerCell(meta.reportingYear)}</tr>
-    <tr><th>${htmlEscape(t("assessmentOwner"))}</th>${excelTextCell(meta.owner)}</tr>
-    <tr><th>${htmlEscape(t("impactThreshold"))}</th>${excelNumberCell(meta.impactThreshold.toFixed(1))}</tr>
-    <tr><th>${htmlEscape(t("financialThreshold"))}</th>${excelNumberCell(meta.financialThreshold.toFixed(1))}</tr>
-    <tr><th>${htmlEscape(t("topicsTab"))}</th>${excelIntegerCell(rows.length)}</tr>
-    <tr><th>${htmlEscape(t("materialTopics"))}</th>${excelIntegerCell(materialRows.length)}</tr>
-    <tr><th>${htmlEscape(t("sourcePage"))}</th><td><a href="${htmlEscape(sourceUrl)}">${htmlEscape(t("sourceLinkText"))}</a><br>${htmlEscape(sourceUrl)}</td></tr>
-  </table>
-  <h2>${htmlEscape(t("topicsSheet"))}</h2>
-  <table>
-    <thead><tr>${headerLabels.map(label => `<th>${htmlEscape(label)}</th>`).join("")}</tr></thead>
-    <tbody>
-      ${rows.map(row => `<tr>${headers.map(header => {
-        if (["category", "valueChain", "timeHorizon", "status", "evidenceQuality"].includes(header)) return excelCell(optionLabel(row[header]));
-        if (header === "materiality") return excelCell(row[header] === "material" ? t("material") : row[header] === "monitor" ? t("monitor") : t("optional"));
-        if (["impactScale", "impactScope", "impactIrremediability", "impactLikelihood", "financialMagnitude", "financialLikelihood"].includes(header)) return excelIntegerCell(row[header]);
-        if (["impactScore", "financialScore"].includes(header)) return excelNumberCell(row[header]);
-        return excelCell(row[header]);
-      }).join("")}</tr>`).join("")}
-    </tbody>
-  </table>
-</body>
-</html>`;
-  download(t("excelFile"), new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8" }));
+  const overviewRows = [
+    [{ value: t("title"), style: 1 }],
+    [],
+    [{ value: t("overviewSheet"), style: 2 }, { value: "", style: 2 }],
+    [{ value: t("companyName"), style: 3 }, xlsxText(meta.companyName)],
+    [{ value: t("sector"), style: 3 }, xlsxText(meta.sector)],
+    [{ value: t("reportingYear"), style: 3 }, xlsxNumber(meta.reportingYear, 6)],
+    [{ value: t("assessmentOwner"), style: 3 }, xlsxText(meta.owner)],
+    [{ value: t("impactThreshold"), style: 3 }, xlsxNumber(meta.impactThreshold)],
+    [{ value: t("financialThreshold"), style: 3 }, xlsxNumber(meta.financialThreshold)],
+    [{ value: t("topicsTab"), style: 3 }, xlsxNumber(rows.length, 6)],
+    [{ value: t("materialTopics"), style: 3 }, xlsxNumber(materialRows.length, 6)],
+    [{ value: t("sourcePage"), style: 3 }, xlsxText(`${t("sourceLinkText")}: ${sourceUrl}`, 7)]
+  ];
+  const topicRows = [
+    headerLabels.map(label => ({ value: label, style: 2 })),
+    ...rows.map(row => headers.map(header => {
+      if (["category", "valueChain", "timeHorizon", "status", "evidenceQuality"].includes(header)) return xlsxText(optionLabel(row[header]));
+      if (header === "materiality") return xlsxText(row[header] === "material" ? t("material") : row[header] === "monitor" ? t("monitor") : t("optional"));
+      if (["impactScale", "impactScope", "impactIrremediability", "impactLikelihood", "financialMagnitude", "financialLikelihood", "impactScore", "financialScore"].includes(header)) {
+        return xlsxNumber(row[header]);
+      }
+      if (["disclosure", "evidence"].includes(header)) return xlsxText(row[header], 7);
+      return xlsxText(row[header]);
+    }))
+  ];
+  const bytes = buildXlsx({
+    overview: overviewRows,
+    topics: topicRows,
+    importData: [[JSON.stringify(assessmentPayload())]]
+  });
+  download(t("excelFile"), new Blob([bytes], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
 }
 
 function exportSvg() {

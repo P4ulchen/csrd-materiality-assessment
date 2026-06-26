@@ -8,19 +8,23 @@
   </head>
   <body>
     <header class="topbar">
-      <div>
+      <a id="brandHomeLink" class="topbar-brand" href="index.html?lang=en" aria-label="Overview">
         <p class="eyebrow" data-i18n="eyebrow">CSRD and ESRS workspace</p>
         <h1 data-i18n="title">Double Materiality Assessment</h1>
+      </a>
+      <div class="topbar-controls">
+        <div class="topbar-nav">
+          <label class="language-control">
+            <span data-i18n="language">Language</span>
+            <select id="homeLanguageSelect" aria-label="Language">
+              <option value="en">English</option>
+              <option value="de">Deutsch</option>
+              <option value="fr">Francais</option>
+              <option value="es">Espanol</option>
+            </select>
+          </label>
+        </div>
       </div>
-      <label class="language-control">
-        <span data-i18n="language">Language</span>
-        <select id="homeLanguageSelect" aria-label="Language">
-          <option value="en">English</option>
-          <option value="de">Deutsch</option>
-          <option value="fr">Francais</option>
-          <option value="es">Espanol</option>
-        </select>
-      </label>
     </header>
 
     <main class="home-shell">
@@ -175,6 +179,7 @@
       };
 
       const languageSelect = document.querySelector("#homeLanguageSelect");
+      const brandHomeLink = document.querySelector("#brandHomeLink");
       const toolLink = document.querySelector("#toolLink");
       const toolGuideLink = document.querySelector("#toolGuideLink");
       const csrdGuideLink = document.querySelector("#csrdGuideLink");
@@ -188,6 +193,7 @@
           element.textContent = dictionary[element.dataset.i18n];
         });
         languageSelect.value = activeLanguage;
+        brandHomeLink.href = `index.html?lang=${activeLanguage}`;
         toolLink.href = `tool.html?lang=${activeLanguage}`;
         toolGuideLink.href = `guide-tool.html?lang=${activeLanguage}`;
         csrdGuideLink.href = `guide-csrd.html?lang=${activeLanguage}`;
