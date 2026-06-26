@@ -14,7 +14,6 @@
         <h1 data-i18n="title">Tool Guide</h1>
       </div>
       <a id="homeLink" class="home-link" href="index.html?lang=en" data-i18n="overview">Overview</a>
-      <a id="guidesLink" class="home-link" href="guides.html?lang=en" data-i18n="guides">Guides</a>
       <a id="toolLink" class="home-link" href="tool.html?lang=en" data-i18n="tool">Tool</a>
       <label class="language-control">
         <span data-i18n="language">Language</span>
@@ -32,7 +31,7 @@
     <script>
       const translations = {
         en: {
-          eyebrow: "CSRD and ESRS workspace", title: "Tool Guide", overview: "Overview", guides: "Guides", tool: "Tool", language: "Language",
+          eyebrow: "CSRD and ESRS workspace", title: "Tool Guide", overview: "Overview", tool: "Tool", language: "Language",
           article: `
             <p class="eyebrow">Tool guide</p>
             <h2>Step-by-step guide: using the CSRD double materiality assessment tool</h2>
@@ -57,7 +56,7 @@
             <p>Before publication, compare the material topics with ESRS disclosure requirements and your assurance plan. The tool supports documentation, but it does not replace legal review, management judgement or assurance procedures.</p>`
         },
         de: {
-          eyebrow: "CSRD- und ESRS-Arbeitsbereich", title: "Tool Guide", overview: "Uebersicht", guides: "Guides", tool: "Tool", language: "Sprache",
+          eyebrow: "CSRD- und ESRS-Arbeitsbereich", title: "Tool Guide", overview: "Uebersicht", tool: "Tool", language: "Sprache",
           article: `
             <p class="eyebrow">Tool Guide</p>
             <h2>Step-by-Step Guide: So nutzt du das CSRD-Tool zur doppelten Wesentlichkeitsanalyse</h2>
@@ -82,7 +81,7 @@
             <p>Vor der Veroeffentlichung sollten die wesentlichen Themen mit den ESRS-Angabepflichten und dem Assurance-Plan abgeglichen werden. Das Tool unterstuetzt die Dokumentation, ersetzt aber keine rechtliche Pruefung, Managementbeurteilung oder Assurance.</p>`
         },
         fr: {
-          eyebrow: "Espace CSRD et ESRS", title: "Guide outil", overview: "Apercu", guides: "Guides", tool: "Outil", language: "Langue",
+          eyebrow: "Espace CSRD et ESRS", title: "Guide outil", overview: "Apercu", tool: "Outil", language: "Langue",
           article: `
             <p class="eyebrow">Guide outil</p>
             <h2>Guide pas a pas: utiliser l'outil d'evaluation de double materialite CSRD</h2>
@@ -94,7 +93,7 @@
             <h3>5. Exporter</h3><p>Utilisez le PDF pour la documentation narrative, Excel pour les travaux de revue, et SVG ou PNG pour les presentations.</p>`
         },
         es: {
-          eyebrow: "Espacio CSRD y ESRS", title: "Guia de herramienta", overview: "Resumen", guides: "Guias", tool: "Herramienta", language: "Idioma",
+          eyebrow: "Espacio CSRD y ESRS", title: "Guia de herramienta", overview: "Resumen", tool: "Herramienta", language: "Idioma",
           article: `
             <p class="eyebrow">Guia de herramienta</p>
             <h2>Guia paso a paso: usar la herramienta de evaluacion de doble materialidad CSRD</h2>
@@ -108,7 +107,7 @@
       };
       const selector = document.querySelector("#articleLanguageSelect");
       const article = document.querySelector("#article");
-      const links = { home: document.querySelector("#homeLink"), guides: document.querySelector("#guidesLink"), tool: document.querySelector("#toolLink") };
+      const links = { home: document.querySelector("#homeLink"), tool: document.querySelector("#toolLink") };
       function setLanguage(language) {
         const active = translations[language] ? language : "en";
         const t = translations[active];
@@ -118,7 +117,6 @@
         article.innerHTML = t.article;
         selector.value = active;
         links.home.href = `index.html?lang=${active}`;
-        links.guides.href = `guides.html?lang=${active}`;
         links.tool.href = `tool.html?lang=${active}`;
       }
       selector.addEventListener("change", event => setLanguage(event.target.value));
