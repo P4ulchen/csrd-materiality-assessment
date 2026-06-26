@@ -90,6 +90,11 @@ const translations = {
     notDocumented: "Not documented",
     page: "Page",
     pdfFile: "csrd-materiality-assessment-report.pdf",
+    excelFile: "csrd-materiality-assessment.xls",
+    sourcePage: "Source page",
+    sourceLinkText: "Assessment tool",
+    overviewSheet: "Overview",
+    topicsSheet: "Topics",
     svgTitle: "{company} CSRD materiality matrix",
     newTopic: "New sustainability matter",
     removeTopic: "Remove topic",
@@ -181,6 +186,11 @@ const translations = {
     notDocumented: "Nicht dokumentiert",
     page: "Seite",
     pdfFile: "csrd-wesentlichkeitsanalyse-bericht.pdf",
+    excelFile: "csrd-wesentlichkeitsanalyse.xls",
+    sourcePage: "Quellseite",
+    sourceLinkText: "Assessment-Tool",
+    overviewSheet: "Uebersicht",
+    topicsSheet: "Themen",
     svgTitle: "{company} CSRD-Wesentlichkeitsmatrix",
     newTopic: "Neues Nachhaltigkeitsthema",
     removeTopic: "Thema entfernen",
@@ -272,6 +282,11 @@ const translations = {
     notDocumented: "Non documente",
     page: "Page",
     pdfFile: "rapport-evaluation-materialite-csrd.pdf",
+    excelFile: "rapport-evaluation-materialite-csrd.xls",
+    sourcePage: "Page source",
+    sourceLinkText: "Outil d'evaluation",
+    overviewSheet: "Apercu",
+    topicsSheet: "Sujets",
     svgTitle: "{company} matrice de materialite CSRD",
     newTopic: "Nouvelle question de durabilite",
     removeTopic: "Supprimer le sujet",
@@ -363,6 +378,11 @@ const translations = {
     notDocumented: "No documentado",
     page: "Pagina",
     pdfFile: "informe-evaluacion-materialidad-csrd.pdf",
+    excelFile: "informe-evaluacion-materialidad-csrd.xls",
+    sourcePage: "Pagina de origen",
+    sourceLinkText: "Herramienta de evaluacion",
+    overviewSheet: "Resumen",
+    topicsSheet: "Temas",
     svgTitle: "{company} matriz de materialidad CSRD",
     newTopic: "Nuevo asunto de sostenibilidad",
     removeTopic: "Eliminar tema",
@@ -602,6 +622,12 @@ function getCompanyMeta() {
   };
 }
 
+function getSourceUrl() {
+  const url = new URL("tool.html", window.location.href);
+  url.searchParams.set("lang", lang());
+  return url.href;
+}
+
 function optionList(values, selected) {
   return values.map(value => `<option value="${value}" ${value === selected ? "selected" : ""}>${optionLabel(value)}</option>`).join("");
 }
@@ -825,6 +851,14 @@ function exportRows() {
     }));
 }
 
+function htmlEscape(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
 function download(filename, blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -843,6 +877,10 @@ function pdfEscape(value) {
     .replaceAll(")", "\\)")
     .replaceAll("\r", " ")
     .replaceAll("\n", " ");
+}
+
+function pdfUri(value) {
+  return pdfEscape(value);
 }
 
 function wrapText(text, maxChars) {
@@ -1002,6 +1040,7 @@ function createTopicPageContent(topic, meta, pageNumber) {
   wrapText(t("footerNote"), 116).slice(0, 2).forEach((line, index) => {
     parts.push(textLine(line, 42, 84 - index * 10, 7.2, "0.38 0.44 0.41"));
   });
+  parts.push(textLine(`${t("sourcePage")}: ${t("sourceLinkText")}`, 42, 56, 7.2, "0.12 0.32 0.54"));
   parts.push(textLine(`${t("page")} ${pageNumber}`, 518, 40, 8, "0.38 0.44 0.41"));
   return parts.join("");
 }
@@ -1017,7 +1056,8 @@ function createMatrixPageContent(meta, imageId) {
     textLine(t("pdfMatrixTitle"), 56, 555, 22, "0.08 0.13 0.11"),
     textLine(format("sectorLine", { company: meta.companyName, sector: meta.sector, year: meta.reportingYear }), 56, 532, 10, "0.38 0.44 0.41"),
     textLine(format("thresholdsLine", { impact: meta.impactThreshold.toFixed(1), financial: meta.financialThreshold.toFixed(1), date: new Date(meta.exportedAt).toLocaleDateString(lang()) }), 56, 515, 9, "0.38 0.44 0.41"),
-    textLine(t("pdfDisclaimer"), 56, 42, 8, "0.38 0.44 0.41")
+    textLine(t("pdfDisclaimer"), 56, 42, 8, "0.38 0.44 0.41"),
+    textLine(`${t("sourcePage")}: ${t("sourceLinkText")}`, 56, 26, 8, "0.12 0.32 0.54")
   ].join("");
 }
 
@@ -1031,27 +1071,116 @@ async function exportPdf() {
   const imageId = pdf.reserve();
   const matrixContentId = pdf.reserve();
   const matrixPageId = pdf.reserve();
+  const matrixLinkId = pdf.reserve();
   const pageIds = [matrixPageId];
+  const sourceUrl = getSourceUrl();
 
   const jpegBytes = base64ToBytes(refs.canvas.toDataURL("image/jpeg", 0.94).split(",")[1]);
   pdf.setAscii(fontId, "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
   pdf.setStream(imageId, `/Type /XObject /Subtype /Image /Width ${refs.canvas.width} /Height ${refs.canvas.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode`, jpegBytes);
   pdf.setStream(matrixContentId, "", new TextEncoder().encode(createMatrixPageContent(meta, imageId)));
-  pdf.setAscii(matrixPageId, `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 841.89 595.28] /Resources << /Font << /F1 ${fontId} 0 R >> /XObject << /Im1 ${imageId} 0 R >> >> /Contents ${matrixContentId} 0 R >>`);
+  pdf.setAscii(matrixLinkId, `<< /Type /Annot /Subtype /Link /Rect [56 22 190 36] /Border [0 0 0] /A << /S /URI /URI (${pdfUri(sourceUrl)}) >> >>`);
+  pdf.setAscii(matrixPageId, `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 841.89 595.28] /Resources << /Font << /F1 ${fontId} 0 R >> /XObject << /Im1 ${imageId} 0 R >> >> /Annots [${matrixLinkId} 0 R] /Contents ${matrixContentId} 0 R >>`);
 
   const rows = exportRows();
   rows.forEach((row, index) => {
     const topic = state.topics.find(item => item.code === row.code && item.title === row.title) || state.topics[index];
     const contentId = pdf.reserve();
     const pageId = pdf.reserve();
+    const linkId = pdf.reserve();
     pageIds.push(pageId);
     pdf.setStream(contentId, "", new TextEncoder().encode(createTopicPageContent(topic, meta, index + 2)));
-    pdf.setAscii(pageId, `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Contents ${contentId} 0 R >>`);
+    pdf.setAscii(linkId, `<< /Type /Annot /Subtype /Link /Rect [42 52 170 64] /Border [0 0 0] /A << /S /URI /URI (${pdfUri(sourceUrl)}) >> >>`);
+    pdf.setAscii(pageId, `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 ${fontId} 0 R >> >> /Annots [${linkId} 0 R] /Contents ${contentId} 0 R >>`);
   });
 
   pdf.setAscii(pagesId, `<< /Type /Pages /Kids [${pageIds.map(id => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`);
   pdf.setAscii(catalogId, `<< /Type /Catalog /Pages ${pagesId} 0 R >>`);
   download(t("pdfFile"), pdf.build(catalogId));
+}
+
+function excelCell(value) {
+  return `<td>${htmlEscape(value)}</td>`;
+}
+
+function exportExcel() {
+  const meta = getCompanyMeta();
+  const sourceUrl = getSourceUrl();
+  const rows = exportRows();
+  const materialRows = rows.filter(row => row.materiality === "material");
+  const headers = [
+    "code",
+    "title",
+    "category",
+    "valueChain",
+    "stakeholders",
+    "owner",
+    "timeHorizon",
+    "status",
+    "impactScore",
+    "financialScore",
+    "materiality",
+    "evidenceQuality",
+    "disclosure",
+    "evidence"
+  ];
+  const headerLabels = [
+    "ESRS",
+    t("topicsTab"),
+    t("category"),
+    t("valueChain"),
+    t("stakeholders"),
+    t("owner"),
+    t("timeHorizon"),
+    t("status"),
+    t("impactScore"),
+    t("financialScore"),
+    t("material"),
+    t("evidenceQuality"),
+    t("disclosureMapping"),
+    t("evidenceRationale")
+  ];
+  const html = `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: Arial, sans-serif; }
+    h1, h2 { color: #16201d; }
+    table { border-collapse: collapse; margin-bottom: 24px; }
+    th { background: #1f7a56; color: #fff; font-weight: bold; }
+    th, td { border: 1px solid #d9e0dd; padding: 6px 8px; vertical-align: top; }
+    .meta th { background: #edf3f0; color: #16201d; text-align: left; }
+  </style>
+</head>
+<body>
+  <h1>${htmlEscape(t("title"))}</h1>
+  <h2>${htmlEscape(t("overviewSheet"))}</h2>
+  <table class="meta">
+    <tr><th>${htmlEscape(t("companyName"))}</th>${excelCell(meta.companyName)}</tr>
+    <tr><th>${htmlEscape(t("sector"))}</th>${excelCell(meta.sector)}</tr>
+    <tr><th>${htmlEscape(t("reportingYear"))}</th>${excelCell(meta.reportingYear)}</tr>
+    <tr><th>${htmlEscape(t("assessmentOwner"))}</th>${excelCell(meta.owner)}</tr>
+    <tr><th>${htmlEscape(t("impactThreshold"))}</th>${excelCell(meta.impactThreshold.toFixed(1))}</tr>
+    <tr><th>${htmlEscape(t("financialThreshold"))}</th>${excelCell(meta.financialThreshold.toFixed(1))}</tr>
+    <tr><th>${htmlEscape(t("topicsTab"))}</th>${excelCell(rows.length)}</tr>
+    <tr><th>${htmlEscape(t("materialTopics"))}</th>${excelCell(materialRows.length)}</tr>
+    <tr><th>${htmlEscape(t("sourcePage"))}</th><td><a href="${htmlEscape(sourceUrl)}">${htmlEscape(t("sourceLinkText"))}</a><br>${htmlEscape(sourceUrl)}</td></tr>
+  </table>
+  <h2>${htmlEscape(t("topicsSheet"))}</h2>
+  <table>
+    <thead><tr>${headerLabels.map(label => `<th>${htmlEscape(label)}</th>`).join("")}</tr></thead>
+    <tbody>
+      ${rows.map(row => `<tr>${headers.map(header => {
+        if (["category", "valueChain", "timeHorizon", "status", "evidenceQuality"].includes(header)) return excelCell(optionLabel(row[header]));
+        if (header === "materiality") return excelCell(row[header] === "material" ? t("material") : row[header] === "monitor" ? t("monitor") : t("optional"));
+        return excelCell(row[header]);
+      }).join("")}</tr>`).join("")}
+    </tbody>
+  </table>
+</body>
+</html>`;
+  download(t("excelFile"), new Blob([html], { type: "application/vnd.ms-excel;charset=utf-8" }));
 }
 
 function exportSvg() {
@@ -1110,6 +1239,7 @@ refs.financialThreshold.addEventListener("input", render);
 refs.includeOptional.addEventListener("change", renderSummary);
 refs.languageSelect.addEventListener("change", render);
 document.querySelector("#exportPdfBtn").addEventListener("click", exportPdf);
+document.querySelector("#exportExcelBtn").addEventListener("click", exportExcel);
 document.querySelector("#exportSvgBtn").addEventListener("click", exportSvg);
 document.querySelector("#exportPngBtn").addEventListener("click", exportPng);
 

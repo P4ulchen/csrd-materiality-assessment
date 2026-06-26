@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CSRD Double Materiality Assessment Guide</title>
+    <meta name="description" content="SEO guide to the CSRD double materiality assessment process, ESRS materiality analysis and sustainability reporting outputs.">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow" data-i18n="eyebrow">CSRD and ESRS workspace</p>
+        <h1 data-i18n="title">CSRD Guide</h1>
+      </div>
+      <a id="homeLink" class="home-link" href="index.html?lang=en" data-i18n="overview">Overview</a>
+      <a id="guidesLink" class="home-link" href="guides.html?lang=en" data-i18n="guides">Guides</a>
+      <a id="toolLink" class="home-link" href="tool.html?lang=en" data-i18n="tool">Tool</a>
+      <label class="language-control">
+        <span data-i18n="language">Language</span>
+        <select id="articleLanguageSelect" aria-label="Language">
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+          <option value="fr">Francais</option>
+          <option value="es">Espanol</option>
+        </select>
+      </label>
+    </header>
+    <main class="guide-shell">
+      <article id="article" class="guide-article"></article>
+    </main>
+    <script>
+      const translations = {
+        en: {
+          eyebrow: "CSRD and ESRS workspace", title: "CSRD Guide", overview: "Overview", guides: "Guides", tool: "Tool", language: "Language",
+          article: `
+            <p class="eyebrow">CSRD guide</p>
+            <h2>Double materiality assessment for CSRD reporting: process, ESRS outputs and practical workflow</h2>
+            <p>A double materiality assessment is the foundation of CSRD sustainability reporting. It helps a company identify which sustainability matters are material from two perspectives: the company's impacts on people and the environment, and the financial effects of sustainability risks and opportunities on the company.</p>
+            <h3>What is double materiality under CSRD?</h3>
+            <p>CSRD reporting is built on ESRS. Under this framework, impact materiality and financial materiality are assessed together. A matter can be material from either perspective. That means a topic may need reporting because the company has significant impacts, because the matter creates financial risk or opportunity, or because both perspectives apply.</p>
+            <h3>Step 1: Scope the assessment</h3><p>Define reporting entities, business activities, geographic coverage, time horizons and the value chain. A strong scope prevents gaps later when topics are mapped to ESRS disclosures.</p>
+            <h3>Step 2: Build the long list of sustainability matters</h3><p>Use ESRS E1-E5, S1-S4 and G1 as the starting universe. Add company-specific topics from strategy, risk registers, complaints, supplier data, customer requirements, regulatory developments and stakeholder engagement.</p>
+            <h3>Step 3: Engage stakeholders and collect evidence</h3><p>Stakeholder input can come from interviews, surveys, workshops, employee representatives, supplier assessments, community feedback, investor expectations and customer requirements. Evidence should be traceable and retained for review.</p>
+            <h3>Step 4: Assess impact materiality</h3><p>Evaluate scale, scope, irremediability and likelihood for actual and potential impacts. Consider both negative and positive impacts and look beyond direct operations into upstream and downstream value chain activities.</p>
+            <h3>Step 5: Assess financial materiality</h3><p>Evaluate magnitude and likelihood of sustainability-related risks and opportunities. Consider revenue, costs, assets, liabilities, financing, insurance, supply continuity, customer demand and regulatory exposure.</p>
+            <h3>Step 6: Set thresholds and validate results</h3><p>Thresholds translate scoring into decisions. They should be clear, documented and approved. Review borderline topics carefully and explain why each topic is material, monitored or below threshold.</p>
+            <h3>Step 7: Connect material topics to CSRD reporting</h3><p>Material topics should be mapped to ESRS disclosure requirements. For each material matter, prepare policies, actions, targets, metrics, governance responsibilities and time horizons. This is where the assessment becomes the structure of the sustainability statement.</p>
+            <h3>Step 8: Prepare report-ready documentation</h3><p>A useful CSRD materiality file should include the matrix, topic register, thresholds, evidence sources, stakeholder inputs, management sign-off and disclosure mapping. This tool supports that documentation by exporting a PDF narrative and an Excel working paper.</p>
+            <h3>SEO summary: CSRD double materiality assessment</h3><p>Companies preparing CSRD reporting should use a structured double materiality assessment to identify material sustainability matters, document ESRS-aligned evidence and create a clear basis for the sustainability statement. A good process links stakeholder engagement, impact materiality, financial materiality, value chain analysis and reporting outputs into one auditable workflow.</p>`
+        },
+        de: {
+          eyebrow: "CSRD- und ESRS-Arbeitsbereich", title: "CSRD Guide", overview: "Uebersicht", guides: "Guides", tool: "Tool", language: "Sprache",
+          article: `
+            <p class="eyebrow">CSRD Guide</p>
+            <h2>Doppelte Wesentlichkeitsanalyse fuer CSRD-Reporting: Prozess, ESRS-Ergebnisse und praktische Umsetzung</h2>
+            <p>Die doppelte Wesentlichkeitsanalyse ist die Grundlage der CSRD-Nachhaltigkeitsberichterstattung. Sie hilft Unternehmen zu bestimmen, welche Nachhaltigkeitsthemen aus zwei Perspektiven wesentlich sind: Auswirkungen des Unternehmens auf Menschen und Umwelt sowie finanzielle Effekte von Nachhaltigkeitsrisiken und -chancen auf das Unternehmen.</p>
+            <h3>Was bedeutet doppelte Wesentlichkeit nach CSRD?</h3><p>CSRD-Reporting basiert auf den ESRS. Impact-Wesentlichkeit und finanzielle Wesentlichkeit werden gemeinsam betrachtet. Ein Thema kann bereits aus einer Perspektive wesentlich sein.</p>
+            <h3>Schritt 1: Scope der Analyse festlegen</h3><p>Definiere Berichtseinheiten, Geschaeftsaktivitaeten, geografische Abdeckung, Zeithorizonte und Wertschoepfungskette.</p>
+            <h3>Schritt 2: Longlist der Nachhaltigkeitsthemen erstellen</h3><p>Nutze ESRS E1-E5, S1-S4 und G1 als Ausgangsuniversum und ergaenze unternehmensspezifische Themen aus Strategie, Risiko, Beschwerden, Lieferantendaten und Stakeholder-Dialogen.</p>
+            <h3>Schritt 3: Stakeholder einbinden und Evidenz sammeln</h3><p>Stakeholder-Input kann aus Interviews, Umfragen, Workshops, Arbeitnehmervertretungen, Lieferantenbewertungen, Community-Feedback, Investorenerwartungen und Kundenanforderungen kommen.</p>
+            <h3>Schritt 4: Impact-Wesentlichkeit bewerten</h3><p>Bewerte Ausmass, Umfang, Unumkehrbarkeit und Wahrscheinlichkeit tatsaechlicher und potenzieller Auswirkungen entlang der Wertschoepfungskette.</p>
+            <h3>Schritt 5: Finanzielle Wesentlichkeit bewerten</h3><p>Bewerte Hoehe und Wahrscheinlichkeit nachhaltigkeitsbezogener Risiken und Chancen fuer Umsatz, Kosten, Vermoegen, Finanzierung, Nachfrage und regulatorische Exposition.</p>
+            <h3>Schritt 6: Schwellenwerte setzen und Ergebnisse validieren</h3><p>Schwellenwerte uebersetzen Bewertungen in Entscheidungen. Grenzfaelle sollten bewusst geprueft und begruendet werden.</p>
+            <h3>Schritt 7: Wesentliche Themen mit CSRD-Reporting verbinden</h3><p>Wesentliche Themen werden ESRS-Angabepflichten, Policies, Massnahmen, Zielen, Kennzahlen und Governance-Verantwortlichkeiten zugeordnet.</p>
+            <h3>Schritt 8: Berichtsfertige Dokumentation erstellen</h3><p>Eine gute CSRD-Wesentlichkeitsakte enthaelt Matrix, Themenregister, Schwellenwerte, Evidenzquellen, Stakeholder-Input, Managementfreigabe und Disclosure-Mapping.</p>
+            <h3>SEO-Zusammenfassung: Doppelte Wesentlichkeitsanalyse nach CSRD</h3><p>Unternehmen sollten eine strukturierte doppelte Wesentlichkeitsanalyse nutzen, um wesentliche Nachhaltigkeitsthemen zu identifizieren, ESRS-konforme Evidenz zu dokumentieren und eine belastbare Grundlage fuer die Nachhaltigkeitserklaerung zu schaffen.</p>`
+        },
+        fr: {
+          eyebrow: "Espace CSRD et ESRS", title: "Guide CSRD", overview: "Apercu", guides: "Guides", tool: "Outil", language: "Langue",
+          article: `<p class="eyebrow">Guide CSRD</p><h2>Evaluation de double materialite pour le reporting CSRD: processus et livrables ESRS</h2><p>Une evaluation de double materialite identifie les questions de durabilite importantes du point de vue des impacts et du point de vue financier. Elle constitue la base de la declaration de durabilite CSRD.</p><h3>Processus recommande</h3><p>Definir le perimetre, etablir la liste longue des sujets ESRS, engager les parties prenantes, collecter les preuves, evaluer la materialite d'impact et financiere, valider les seuils et mapper les sujets materiels aux exigences ESRS.</p><h3>Reporting</h3><p>Les sujets materiels doivent etre relies aux politiques, actions, objectifs, indicateurs, responsabilites de gouvernance et horizons temporels. Le resultat doit etre documente de facon tracable pour la revue et l'assurance.</p><h3>Resume SEO</h3><p>Une evaluation de double materialite CSRD bien structuree relie engagement des parties prenantes, analyse de la chaine de valeur, materialite d'impact, materialite financiere et reporting ESRS dans un processus auditable.</p>`
+        },
+        es: {
+          eyebrow: "Espacio CSRD y ESRS", title: "Guia CSRD", overview: "Resumen", guides: "Guias", tool: "Herramienta", language: "Idioma",
+          article: `<p class="eyebrow">Guia CSRD</p><h2>Evaluacion de doble materialidad para reporting CSRD: proceso y resultados ESRS</h2><p>Una evaluacion de doble materialidad identifica asuntos de sostenibilidad relevantes desde la perspectiva de impactos y desde la perspectiva financiera. Es la base de la declaracion de sostenibilidad CSRD.</p><h3>Proceso recomendado</h3><p>Define alcance, crea una lista larga de temas ESRS, involucra grupos de interes, recopila evidencias, evalua materialidad de impacto y financiera, valida umbrales y mapea temas materiales a requisitos ESRS.</p><h3>Reporting</h3><p>Los temas materiales deben conectarse con politicas, acciones, objetivos, metricas, responsabilidades de gobierno y horizontes temporales. El resultado debe documentarse de forma trazable para revision y aseguramiento.</p><h3>Resumen SEO</h3><p>Una evaluacion de doble materialidad CSRD bien estructurada conecta grupos de interes, cadena de valor, materialidad de impacto, materialidad financiera y reporting ESRS en un proceso auditable.</p>`
+        }
+      };
+      const selector = document.querySelector("#articleLanguageSelect");
+      const article = document.querySelector("#article");
+      const links = { home: document.querySelector("#homeLink"), guides: document.querySelector("#guidesLink"), tool: document.querySelector("#toolLink") };
+      function setLanguage(language) {
+        const active = translations[language] ? language : "en";
+        const t = translations[active];
+        document.documentElement.lang = active;
+        document.title = `${t.title} | CSRD`;
+        document.querySelectorAll("[data-i18n]").forEach(element => element.textContent = t[element.dataset.i18n]);
+        article.innerHTML = t.article;
+        selector.value = active;
+        links.home.href = `index.html?lang=${active}`;
+        links.guides.href = `guides.html?lang=${active}`;
+        links.tool.href = `tool.html?lang=${active}`;
+      }
+      selector.addEventListener("change", event => setLanguage(event.target.value));
+      setLanguage(new URLSearchParams(location.search).get("lang") || "en");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Step-by-step Guide for the CSRD Assessment Tool</title>
+    <meta name="description" content="Step-by-step guide for using the CSRD double materiality assessment tool, from setup and scoring to PDF, Excel, SVG and PNG exports.">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow" data-i18n="eyebrow">CSRD and ESRS workspace</p>
+        <h1 data-i18n="title">Tool Guide</h1>
+      </div>
+      <a id="homeLink" class="home-link" href="index.html?lang=en" data-i18n="overview">Overview</a>
+      <a id="guidesLink" class="home-link" href="guides.html?lang=en" data-i18n="guides">Guides</a>
+      <a id="toolLink" class="home-link" href="tool.html?lang=en" data-i18n="tool">Tool</a>
+      <label class="language-control">
+        <span data-i18n="language">Language</span>
+        <select id="articleLanguageSelect" aria-label="Language">
+          <option value="en">English</option>
+          <option value="de">Deutsch</option>
+          <option value="fr">Francais</option>
+          <option value="es">Espanol</option>
+        </select>
+      </label>
+    </header>
+    <main class="guide-shell">
+      <article id="article" class="guide-article"></article>
+    </main>
+    <script>
+      const translations = {
+        en: {
+          eyebrow: "CSRD and ESRS workspace", title: "Tool Guide", overview: "Overview", guides: "Guides", tool: "Tool", language: "Language",
+          article: `
+            <p class="eyebrow">Tool guide</p>
+            <h2>Step-by-step guide: using the CSRD double materiality assessment tool</h2>
+            <p>This guide explains how to use the assessment tool from setup to export. It is designed for sustainability, finance, risk, legal and operations teams that need a documented and repeatable CSRD/ESRS materiality workflow.</p>
+            <h3>1. Define the company context</h3>
+            <p>Start in the setup panel and enter the company name, sector, reporting year and assessment owner. This information appears in the matrix and export files, so use the legal entity or group name that matches your reporting boundary.</p>
+            <h3>2. Set materiality thresholds</h3>
+            <p>Use the impact and financial materiality threshold sliders to define when a topic becomes material. The matrix treats a topic as material when either impact materiality or financial materiality reaches the selected threshold. Keep a short internal note explaining who approved the threshold and why.</p>
+            <h3>3. Review the ESRS topic universe</h3>
+            <p>The tool starts with ESRS environmental, social and governance topics. Review each topic and adapt the wording to your company context. Add additional entity-specific sustainability matters where your business model, products, geography or value chain requires them.</p>
+            <h3>4. Score impact materiality</h3>
+            <p>For each topic, score scale, scope, irremediability and likelihood from 1 to 5. Use evidence such as stakeholder input, incident data, supplier risk mapping, human rights assessments, environmental measurements or customer feedback.</p>
+            <h3>5. Score financial materiality</h3>
+            <p>Score magnitude and likelihood for risks and opportunities that may affect financial position, performance, cash flows, access to finance or enterprise value. Align the scoring discussion with risk management and finance teams.</p>
+            <h3>6. Document stakeholders, owners and evidence</h3>
+            <p>Enter the stakeholders considered, value chain location, owner, status, time horizon, ESRS mapping, evidence quality and rationale. The evidence field is important because it becomes the basis for the report-ready PDF and Excel exports.</p>
+            <h3>7. Use the matrix for review</h3>
+            <p>The matrix plots impact materiality on the horizontal axis and financial materiality on the vertical axis. Topics in the material area should be reviewed by management and mapped to ESRS disclosure requirements, metrics, targets, policies and actions.</p>
+            <h3>8. Export and retain the audit trail</h3>
+            <p>Export the PDF for a report-ready narrative record, the Excel file for working papers and review, and SVG or PNG for presentation use. The PDF and Excel include a source link back to the tool page.</p>
+            <h3>9. Final review before reporting</h3>
+            <p>Before publication, compare the material topics with ESRS disclosure requirements and your assurance plan. The tool supports documentation, but it does not replace legal review, management judgement or assurance procedures.</p>`
+        },
+        de: {
+          eyebrow: "CSRD- und ESRS-Arbeitsbereich", title: "Tool Guide", overview: "Uebersicht", guides: "Guides", tool: "Tool", language: "Sprache",
+          article: `
+            <p class="eyebrow">Tool Guide</p>
+            <h2>Step-by-Step Guide: So nutzt du das CSRD-Tool zur doppelten Wesentlichkeitsanalyse</h2>
+            <p>Dieser Guide erklaert die Nutzung des Assessment-Tools von der Einrichtung bis zum Export. Er richtet sich an Nachhaltigkeits-, Finanz-, Risiko-, Rechts- und Operations-Teams, die eine dokumentierte und wiederholbare CSRD/ESRS-Wesentlichkeitsanalyse erstellen moechten.</p>
+            <h3>1. Unternehmenskontext festlegen</h3>
+            <p>Trage im Setup-Bereich Unternehmensname, Sektor, Berichtsjahr und verantwortliche Person ein. Diese Angaben erscheinen in Matrix, PDF und Excel. Nutze daher die Bezeichnung der rechtlichen Einheit oder Gruppe, die zur Berichtsgrenze passt.</p>
+            <h3>2. Schwellenwerte definieren</h3>
+            <p>Lege die Schwellen fuer Impact-Wesentlichkeit und finanzielle Wesentlichkeit fest. Ein Thema gilt im Tool als wesentlich, wenn eine der beiden Achsen den gewaehlten Schwellenwert erreicht. Dokumentiere intern kurz, wer die Schwellen genehmigt hat und warum sie angemessen sind.</p>
+            <h3>3. ESRS-Themenuniversum pruefen</h3>
+            <p>Das Tool startet mit Umwelt-, Sozial- und Governance-Themen aus den ESRS. Pruefe jedes Thema und passe die Beschreibung an dein Unternehmen an. Ergaenze weitere unternehmensspezifische Nachhaltigkeitsthemen, wenn Geschaeftsmodell, Produkte, Standorte oder Wertschoepfungskette dies erfordern.</p>
+            <h3>4. Impact-Wesentlichkeit bewerten</h3>
+            <p>Bewerte Ausmass, Umfang, Unumkehrbarkeit und Wahrscheinlichkeit auf einer Skala von 1 bis 5. Nutze Stakeholder-Input, Vorfalldaten, Lieferantenrisikokarten, Menschenrechtsanalysen, Umweltmessungen oder Kundenfeedback als Evidenz.</p>
+            <h3>5. Finanzielle Wesentlichkeit bewerten</h3>
+            <p>Bewerte Hoehe und Wahrscheinlichkeit von Risiken und Chancen, die Finanzlage, Leistung, Cashflows, Finanzierung oder Unternehmenswert beeinflussen koennen. Binde Risiko- und Finanzfunktionen ein, damit die Bewertung anschlussfaehig bleibt.</p>
+            <h3>6. Stakeholder, Verantwortliche und Nachweise dokumentieren</h3>
+            <p>Erfasse Stakeholder, Position in der Wertschoepfungskette, Verantwortliche, Status, Zeithorizont, ESRS-Zuordnung, Nachweisqualitaet und Begruendung. Das Evidenzfeld ist besonders wichtig, da es in PDF- und Excel-Exporten weiterverwendet wird.</p>
+            <h3>7. Matrix fuer Review und Entscheidungen nutzen</h3>
+            <p>Die Matrix zeigt Impact-Wesentlichkeit auf der horizontalen Achse und finanzielle Wesentlichkeit auf der vertikalen Achse. Wesentliche Themen sollten vom Management geprueft und anschliessend ESRS-Angabepflichten, Kennzahlen, Zielen, Policies und Massnahmen zugeordnet werden.</p>
+            <h3>8. Exporte erstellen und Audit Trail sichern</h3>
+            <p>Nutze den PDF-Export fuer eine berichtsnahe Dokumentation, den Excel-Export fuer Arbeitspapiere und Review sowie SVG oder PNG fuer Praesentationen. PDF und Excel enthalten einen Link zur Tool-Seite als Quellenreferenz.</p>
+            <h3>9. Finaler Review vor dem Reporting</h3>
+            <p>Vor der Veroeffentlichung sollten die wesentlichen Themen mit den ESRS-Angabepflichten und dem Assurance-Plan abgeglichen werden. Das Tool unterstuetzt die Dokumentation, ersetzt aber keine rechtliche Pruefung, Managementbeurteilung oder Assurance.</p>`
+        },
+        fr: {
+          eyebrow: "Espace CSRD et ESRS", title: "Guide outil", overview: "Apercu", guides: "Guides", tool: "Outil", language: "Langue",
+          article: `
+            <p class="eyebrow">Guide outil</p>
+            <h2>Guide pas a pas: utiliser l'outil d'evaluation de double materialite CSRD</h2>
+            <p>Ce guide explique comment configurer l'entreprise, choisir les seuils, adapter les sujets ESRS, noter la materialite d'impact et la materialite financiere, documenter les parties prenantes et exporter les resultats.</p>
+            <h3>1. Definir le contexte</h3><p>Renseignez le nom de l'entreprise, le secteur, l'annee de reporting et le responsable de l'evaluation.</p>
+            <h3>2. Choisir les seuils</h3><p>Un sujet devient materiel lorsqu'un score atteint le seuil d'impact ou le seuil financier selectionne.</p>
+            <h3>3. Adapter les sujets</h3><p>Utilisez les sujets ESRS comme base et ajoutez les questions specifiques a l'entreprise, a la chaine de valeur ou aux parties prenantes.</p>
+            <h3>4. Noter et documenter</h3><p>Notez l'echelle, l'etendue, l'irremediabilite, la probabilite, l'ampleur financiere et la probabilite financiere. Ajoutez les preuves et la justification.</p>
+            <h3>5. Exporter</h3><p>Utilisez le PDF pour la documentation narrative, Excel pour les travaux de revue, et SVG ou PNG pour les presentations.</p>`
+        },
+        es: {
+          eyebrow: "Espacio CSRD y ESRS", title: "Guia de herramienta", overview: "Resumen", guides: "Guias", tool: "Herramienta", language: "Idioma",
+          article: `
+            <p class="eyebrow">Guia de herramienta</p>
+            <h2>Guia paso a paso: usar la herramienta de evaluacion de doble materialidad CSRD</h2>
+            <p>Esta guia explica como configurar la empresa, elegir umbrales, adaptar temas ESRS, puntuar materialidad de impacto y financiera, documentar grupos de interes y exportar resultados.</p>
+            <h3>1. Definir el contexto</h3><p>Introduce nombre de empresa, sector, ejercicio de reporte y responsable de evaluacion.</p>
+            <h3>2. Elegir umbrales</h3><p>Un tema es material cuando alcanza el umbral de impacto o el umbral financiero seleccionado.</p>
+            <h3>3. Adaptar temas</h3><p>Usa los temas ESRS como base y anade asuntos especificos de la empresa, cadena de valor o grupos de interes.</p>
+            <h3>4. Puntuar y documentar</h3><p>Puntua escala, alcance, irremediabilidad, probabilidad, magnitud financiera y probabilidad financiera. Anade evidencia y razonamiento.</p>
+            <h3>5. Exportar</h3><p>Usa PDF para documentacion narrativa, Excel para papeles de trabajo, y SVG o PNG para presentaciones.</p>`
+        }
+      };
+      const selector = document.querySelector("#articleLanguageSelect");
+      const article = document.querySelector("#article");
+      const links = { home: document.querySelector("#homeLink"), guides: document.querySelector("#guidesLink"), tool: document.querySelector("#toolLink") };
+      function setLanguage(language) {
+        const active = translations[language] ? language : "en";
+        const t = translations[active];
+        document.documentElement.lang = active;
+        document.title = `${t.title} | CSRD`;
+        document.querySelectorAll("[data-i18n]").forEach(element => element.textContent = t[element.dataset.i18n]);
+        article.innerHTML = t.article;
+        selector.value = active;
+        links.home.href = `index.html?lang=${active}`;
+        links.guides.href = `guides.html?lang=${active}`;
+        links.tool.href = `tool.html?lang=${active}`;
+      }
+      selector.addEventListener("change", event => setLanguage(event.target.value));
+      setLanguage(new URLSearchParams(location.search).get("lang") || "en");
+    </script>
+  </body>
+</html>
