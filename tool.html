@@ -56,13 +56,11 @@
           <h2>Thresholds</h2>
           <label>
             Impact materiality threshold
-            <input id="impactThreshold" type="range" min="1" max="5" step="0.1" value="3.4">
-            <output id="impactThresholdOut">3.4</output>
+            <span class="slider-control threshold-control"><input id="impactThreshold" type="range" min="1" max="5" step="0.1" value="3.4"><output id="impactThresholdOut" class="slider-value threshold-value">3.4</output></span>
           </label>
           <label>
             Financial materiality threshold
-            <input id="financialThreshold" type="range" min="1" max="5" step="0.1" value="3.4">
-            <output id="financialThresholdOut">3.4</output>
+            <span class="slider-control threshold-control"><input id="financialThreshold" type="range" min="1" max="5" step="0.1" value="3.4"><output id="financialThresholdOut" class="slider-value threshold-value">3.4</output></span>
           </label>
           <label class="checkline">
             <input id="includeOptional" type="checkbox" checked>
@@ -179,15 +177,15 @@
         <div class="score-grid">
           <fieldset>
             <legend>Impact materiality</legend>
-            <label>Scale<input class="score impactScale" type="range" min="1" max="5" step="1"></label>
-            <label>Scope<input class="score impactScope" type="range" min="1" max="5" step="1"></label>
-            <label>Irremediability<input class="score impactIrremediability" type="range" min="1" max="5" step="1"></label>
-            <label>Likelihood<input class="score impactLikelihood" type="range" min="1" max="5" step="1"></label>
+            <label>Scale<span class="slider-control"><input class="score impactScale" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
+            <label>Scope<span class="slider-control"><input class="score impactScope" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
+            <label>Irremediability<span class="slider-control"><input class="score impactIrremediability" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
+            <label>Likelihood<span class="slider-control"><input class="score impactLikelihood" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
           </fieldset>
           <fieldset>
             <legend>Financial materiality</legend>
-            <label>Magnitude<input class="score financialMagnitude" type="range" min="1" max="5" step="1"></label>
-            <label>Likelihood<input class="score financialLikelihood" type="range" min="1" max="5" step="1"></label>
+            <label>Magnitude<span class="slider-control"><input class="score financialMagnitude" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
+            <label>Likelihood<span class="slider-control"><input class="score financialLikelihood" type="range" min="1" max="5" step="1"><output class="slider-value">3</output></span></label>
             <label>Evidence quality<select class="evidenceQuality"></select></label>
             <label>Disclosure mapping<input class="disclosure" type="text"></label>
           </fieldset>

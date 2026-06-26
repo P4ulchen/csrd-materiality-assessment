@@ -643,7 +643,9 @@ function createTopicCard(topic) {
   const node = refs.topicTemplate.content.firstElementChild.cloneNode(true);
   const bind = (selector, key) => {
     const input = node.querySelector(selector);
+    const output = input.closest(".slider-control")?.querySelector(".slider-value");
     input.value = topic[key];
+    if (output) output.value = topic[key];
     input.addEventListener("input", event => updateTopic(topic.id, key, event.target.value));
   };
   const bindSelect = (selector, key, values) => {
