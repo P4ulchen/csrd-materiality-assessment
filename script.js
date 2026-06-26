@@ -842,7 +842,13 @@ function exportRows() {
       owner: topic.owner,
       timeHorizon: topic.timeHorizon,
       status: topic.status,
+      impactScale: topic.impactScale,
+      impactScope: topic.impactScope,
+      impactIrremediability: topic.impactIrremediability,
+      impactLikelihood: topic.impactLikelihood,
       impactScore: scoreImpact(topic).toFixed(2),
+      financialMagnitude: topic.financialMagnitude,
+      financialLikelihood: topic.financialLikelihood,
       financialScore: scoreFinancial(topic).toFixed(2),
       materiality: materiality(topic),
       evidenceQuality: topic.evidenceQuality,
@@ -1103,6 +1109,20 @@ function excelCell(value) {
   return `<td>${htmlEscape(value)}</td>`;
 }
 
+function excelTextCell(value) {
+  return `<td style="mso-number-format:'\\@';">${htmlEscape(value)}</td>`;
+}
+
+function excelNumberCell(value) {
+  const number = Number(value);
+  const normalized = Number.isFinite(number) ? String(number).replace(",", ".") : "0";
+  return `<td style="mso-number-format:'0.00';" x:num="${htmlEscape(normalized)}">${htmlEscape(normalized)}</td>`;
+}
+
+function excelIntegerCell(value) {
+  return `<td style="mso-number-format:'0';" x:num="${htmlEscape(value)}">${htmlEscape(value)}</td>`;
+}
+
 function exportExcel() {
   const meta = getCompanyMeta();
   const sourceUrl = getSourceUrl();
@@ -1117,7 +1137,13 @@ function exportExcel() {
     "owner",
     "timeHorizon",
     "status",
+    "impactScale",
+    "impactScope",
+    "impactIrremediability",
+    "impactLikelihood",
     "impactScore",
+    "financialMagnitude",
+    "financialLikelihood",
     "financialScore",
     "materiality",
     "evidenceQuality",
@@ -1133,7 +1159,13 @@ function exportExcel() {
     t("owner"),
     t("timeHorizon"),
     t("status"),
+    t("scale"),
+    t("scope"),
+    t("irremediability"),
+    t("likelihood"),
     t("impactScore"),
+    t("magnitude"),
+    t("likelihood"),
     t("financialScore"),
     t("material"),
     t("evidenceQuality"),
@@ -1141,7 +1173,7 @@ function exportExcel() {
     t("evidenceRationale")
   ];
   const html = `<!doctype html>
-<html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
 <head>
   <meta charset="utf-8">
   <style>
@@ -1157,14 +1189,14 @@ function exportExcel() {
   <h1>${htmlEscape(t("title"))}</h1>
   <h2>${htmlEscape(t("overviewSheet"))}</h2>
   <table class="meta">
-    <tr><th>${htmlEscape(t("companyName"))}</th>${excelCell(meta.companyName)}</tr>
-    <tr><th>${htmlEscape(t("sector"))}</th>${excelCell(meta.sector)}</tr>
-    <tr><th>${htmlEscape(t("reportingYear"))}</th>${excelCell(meta.reportingYear)}</tr>
-    <tr><th>${htmlEscape(t("assessmentOwner"))}</th>${excelCell(meta.owner)}</tr>
-    <tr><th>${htmlEscape(t("impactThreshold"))}</th>${excelCell(meta.impactThreshold.toFixed(1))}</tr>
-    <tr><th>${htmlEscape(t("financialThreshold"))}</th>${excelCell(meta.financialThreshold.toFixed(1))}</tr>
-    <tr><th>${htmlEscape(t("topicsTab"))}</th>${excelCell(rows.length)}</tr>
-    <tr><th>${htmlEscape(t("materialTopics"))}</th>${excelCell(materialRows.length)}</tr>
+    <tr><th>${htmlEscape(t("companyName"))}</th>${excelTextCell(meta.companyName)}</tr>
+    <tr><th>${htmlEscape(t("sector"))}</th>${excelTextCell(meta.sector)}</tr>
+    <tr><th>${htmlEscape(t("reportingYear"))}</th>${excelIntegerCell(meta.reportingYear)}</tr>
+    <tr><th>${htmlEscape(t("assessmentOwner"))}</th>${excelTextCell(meta.owner)}</tr>
+    <tr><th>${htmlEscape(t("impactThreshold"))}</th>${excelNumberCell(meta.impactThreshold.toFixed(1))}</tr>
+    <tr><th>${htmlEscape(t("financialThreshold"))}</th>${excelNumberCell(meta.financialThreshold.toFixed(1))}</tr>
+    <tr><th>${htmlEscape(t("topicsTab"))}</th>${excelIntegerCell(rows.length)}</tr>
+    <tr><th>${htmlEscape(t("materialTopics"))}</th>${excelIntegerCell(materialRows.length)}</tr>
     <tr><th>${htmlEscape(t("sourcePage"))}</th><td><a href="${htmlEscape(sourceUrl)}">${htmlEscape(t("sourceLinkText"))}</a><br>${htmlEscape(sourceUrl)}</td></tr>
   </table>
   <h2>${htmlEscape(t("topicsSheet"))}</h2>
@@ -1174,6 +1206,8 @@ function exportExcel() {
       ${rows.map(row => `<tr>${headers.map(header => {
         if (["category", "valueChain", "timeHorizon", "status", "evidenceQuality"].includes(header)) return excelCell(optionLabel(row[header]));
         if (header === "materiality") return excelCell(row[header] === "material" ? t("material") : row[header] === "monitor" ? t("monitor") : t("optional"));
+        if (["impactScale", "impactScope", "impactIrremediability", "impactLikelihood", "financialMagnitude", "financialLikelihood"].includes(header)) return excelIntegerCell(row[header]);
+        if (["impactScore", "financialScore"].includes(header)) return excelNumberCell(row[header]);
         return excelCell(row[header]);
       }).join("")}</tr>`).join("")}
     </tbody>
