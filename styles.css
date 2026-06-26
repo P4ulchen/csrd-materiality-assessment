@@ -593,6 +593,10 @@ legend {
   min-width: 42px;
 }
 
+.threshold-control {
+  width: calc(100% - 18px);
+}
+
 .card-footer {
   display: flex;
   align-items: center;
