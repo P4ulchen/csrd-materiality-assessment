@@ -674,7 +674,9 @@ function createTopicCard(topic) {
     if (output) output.value = formatScoreInput(topic[key]);
     input.addEventListener("input", event => {
       if (!output) {
-        updateTopic(topic.id, key, event.target.value);
+        updateTopic(topic.id, key, event.target.value, false);
+        drawMatrix();
+        renderSummary();
         return;
       }
       const updatedTopic = updateTopic(topic.id, key, event.target.value, false);
